@@ -75,7 +75,7 @@ namespace Screna.Avi
         }
 
 
-        void ThrowPropertyDefinedByEncoder()
+        static void ThrowPropertyDefinedByEncoder()
         {
             throw new NotSupportedException("The value of the property is defined by the encoder.");
         }

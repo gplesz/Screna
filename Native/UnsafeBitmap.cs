@@ -12,8 +12,8 @@ namespace Screna.Native
     {
         readonly Bitmap _inputBitmap;
         BitmapData _bitmapData;
-        byte* _pBase = null;
-        int _width;
+        byte* _pBase;
+        readonly int _width;
 
         public UnsafeBitmap(Bitmap inputBitmap) 
         {

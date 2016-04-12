@@ -15,7 +15,7 @@ namespace Screna.Audio
     /// The class is designed for using only a single instance at a time.
     /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/
     /// </remarks>
-    public partial class Mp3EncoderLame : IAudioEncoder
+    public class Mp3EncoderLame : IAudioEncoder
     {
         /// <summary>
         /// Supported output bit rates (in kilobits per second).

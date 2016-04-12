@@ -14,7 +14,7 @@ namespace Screna.Avi
     {
         protected AudioStreamWrapperBase(IAviAudioStreamInternal baseStream)
         {
-            this.BaseStream = baseStream;
+            BaseStream = baseStream;
         }
 
         protected IAviAudioStreamInternal BaseStream { get; }

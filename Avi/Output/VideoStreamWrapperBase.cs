@@ -12,7 +12,7 @@ namespace Screna.Avi
     {
         protected VideoStreamWrapperBase(IAviVideoStreamInternal baseStream)
         {
-            this.BaseStream = baseStream;
+            BaseStream = baseStream;
         }
 
         protected IAviVideoStreamInternal BaseStream { get; }

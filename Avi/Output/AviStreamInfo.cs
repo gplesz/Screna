@@ -11,7 +11,7 @@ namespace Screna.Avi
 
         public StreamInfo(FourCC standardIndexChunkId)
         {
-            this.StandardIndexChunkId = standardIndexChunkId;
+            StandardIndexChunkId = standardIndexChunkId;
             FrameCount = 0;
             MaxChunkDataSize = 0;
             TotalDataSize = 0;

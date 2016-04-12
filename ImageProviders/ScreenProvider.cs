@@ -5,35 +5,35 @@ namespace Screna
 {
     public class ScreenProvider : IImageProvider
     {
-        Screen Screen;
-        IOverlay[] Overlays;
+        readonly Screen _screen;
+        readonly IOverlay[] _overlays;
 
         public ScreenProvider(Screen Screen, params IOverlay[] Overlays)
         {
-            this.Screen = Screen;
-            this.Overlays = Overlays;
+            _screen = Screen;
+            _overlays = Overlays;
         }
 
         public Bitmap Capture()
         {
-            var BMP = ScreenShot.Capture(Screen);
+            var bmp = ScreenShot.Capture(_screen);
 
-            using (var g = Graphics.FromImage(BMP))
-                foreach (var overlay in Overlays)
+            using (var g = Graphics.FromImage(bmp))
+                foreach (var overlay in _overlays)
                     overlay.Draw(g, Rectangle.Location);
 
-            return BMP;
+            return bmp;
         }
 
-        public int Height => Screen.Bounds.Height;
+        public int Height => _screen.Bounds.Height;
 
-        public int Width => Screen.Bounds.Height;
+        public int Width => _screen.Bounds.Height;
         
-        Rectangle Rectangle => Screen.Bounds;
+        Rectangle Rectangle => _screen.Bounds;
 
         public void Dispose()
         {
-            foreach (var overlay in Overlays)
+            foreach (var overlay in _overlays)
                 overlay.Dispose();
         }
     }

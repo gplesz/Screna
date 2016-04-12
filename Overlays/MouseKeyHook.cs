@@ -9,15 +9,15 @@ namespace Screna
     /// </summary>
     public class MouseKeyHook : IOverlay
     {
-        MouseListener ClickHook;
-        KeyListener KeyHook;
+        MouseListener _clickHook;
+        KeyListener _keyHook;
 
-        bool MouseClicked = false,
-            Control = false,
-            Shift = false,
-            Alt = false;
+        bool _mouseClicked,
+            _control,
+            _shift,
+            _alt;
 
-        Keys LastKeyPressed = Keys.None;
+        Keys _lastKeyPressed = Keys.None;
 
         public Pen ClickStrokePen { get; set; }
         public double ClickRadius { get; set; }
@@ -35,15 +35,15 @@ namespace Screna
 
             if (CaptureMouseClicks)
             {
-                ClickHook = new MouseListener();
-                ClickHook.MouseDown += (s, e) => MouseClicked = true;
+                _clickHook = new MouseListener();
+                _clickHook.MouseDown += (s, e) => _mouseClicked = true;
             }
 
-            if (CaptureKeystrokes)
-            {
-                KeyHook = new KeyListener();
-                KeyHook.KeyDown += OnKeyPressed;
-            }
+            if (!CaptureKeystrokes)
+                return;
+
+            _keyHook = new KeyListener();
+            _keyHook.KeyDown += OnKeyPressed;
         }
 
         void OnKeyPressed(object sender, KeyEventArgs e)
@@ -54,36 +54,36 @@ namespace Screna
                 case Keys.ShiftKey:
                 case Keys.LShiftKey:
                 case Keys.RShiftKey:
-                    LastKeyPressed = Keys.Shift;
+                    _lastKeyPressed = Keys.Shift;
                     break;
 
                 case Keys.Control:
                 case Keys.ControlKey:
                 case Keys.LControlKey:
                 case Keys.RControlKey:
-                    LastKeyPressed = Keys.Control;
+                    _lastKeyPressed = Keys.Control;
                     break;
 
                 case Keys.Alt:
                 case Keys.Menu:
                 case Keys.LMenu:
                 case Keys.RMenu:
-                    LastKeyPressed = Keys.Alt;
+                    _lastKeyPressed = Keys.Alt;
                     break;
 
                 default:
-                    LastKeyPressed = e.KeyCode;
+                    _lastKeyPressed = e.KeyCode;
                     break;
             }
 
-            Control = e.Control;
-            Shift = e.Shift;
-            Alt = e.Alt;
+            _control = e.Control;
+            _shift = e.Shift;
+            _alt = e.Alt;
         }
 
         public void Draw(Graphics g, Point Offset = default(Point))
         {
-            if (MouseClicked)
+            if (_mouseClicked)
             {
                 var curPos = MouseCursor.CursorPosition;
                 var d = (float)(ClickRadius * 2);
@@ -94,42 +94,42 @@ namespace Screna
                     d, d,
                     0, 360);
 
-                MouseClicked = false;
+                _mouseClicked = false;
             }
 
-            if (LastKeyPressed != Keys.None)
-            {
-                string ToWrite = null;
+            if (_lastKeyPressed == Keys.None)
+                return;
 
-                if (Control) ToWrite += "Ctrl+";
-                if (Shift) ToWrite += "Shift+";
-                if (Alt) ToWrite += "Alt+";
+            string toWrite = null;
 
-                ToWrite += LastKeyPressed.ToString();
+            if (_control) toWrite += "Ctrl+";
+            if (_shift) toWrite += "Shift+";
+            if (_alt) toWrite += "Alt+";
 
-                g.DrawString(ToWrite,
-                    KeyStrokeFont,
-                    KeyStrokeBrush,
-                    KeyStrokeLocation.X,
-                    KeyStrokeLocation.Y);
+            toWrite += _lastKeyPressed.ToString();
 
-                LastKeyPressed = Keys.None;
-            }
+            g.DrawString(toWrite,
+                KeyStrokeFont,
+                KeyStrokeBrush,
+                KeyStrokeLocation.X,
+                KeyStrokeLocation.Y);
+
+            _lastKeyPressed = Keys.None;
         }
 
         public void Dispose()
         {
-            if (ClickHook != null)
+            if (_clickHook != null)
             {
-                ClickHook.Dispose();
-                ClickHook = null;
+                _clickHook.Dispose();
+                _clickHook = null;
             }
 
-            if (KeyHook != null)
-            {
-                KeyHook.Dispose();
-                KeyHook = null;
-            }
+            if (_keyHook == null)
+                return;
+
+            _keyHook.Dispose();
+            _keyHook = null;
         }
     }
 }

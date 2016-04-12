@@ -54,11 +54,12 @@ namespace Screna.Avi
                 var outBitmapInfo = CreateBitmapInfo(8, 8, 24, codec);
                 VfwApi.CompressorInfo compressorInfo;
                 var compressorHandle = GetCompressor(inBitmapInfo, outBitmapInfo, out compressorInfo);
-                if (compressorHandle != IntPtr.Zero)
-                {
-                    VfwApi.ICClose(compressorHandle);
-                    yield return new AviCodec(codec, compressorInfo.Description);
-                }
+
+                if (compressorHandle == IntPtr.Zero)
+                    continue;
+
+                VfwApi.ICClose(compressorHandle);
+                yield return new AviCodec(codec, compressorInfo.Description);
             }
         }
 
@@ -67,9 +68,9 @@ namespace Screna.Avi
             // Using ICLocate is time-consuming. Besides, it does not clean up something, so the process does not terminate on exit.
             // Instead open a specific codec and query it for needed features.
 
-            var CodecType_Video = new FourCC("VIDC");
+            var codecTypeVideo = new FourCC("VIDC");
 
-            var compressorHandle = VfwApi.ICOpen((uint)CodecType_Video, outBitmapInfo.Compression, VfwApi.ICMODE_COMPRESS);
+            var compressorHandle = VfwApi.ICOpen((uint)codecTypeVideo, outBitmapInfo.Compression, VfwApi.ICMODE_COMPRESS);
 
             if (compressorHandle != IntPtr.Zero)
             {
@@ -113,7 +114,7 @@ namespace Screna.Avi
         readonly int quality, keyFrameRate;
 
 
-        int frameIndex = 0, framesFromLastKey;
+        int frameIndex, framesFromLastKey;
         bool isDisposed, needEnd;
 
         /// <summary>
@@ -294,19 +295,19 @@ namespace Screna.Avi
         /// </summary>
         public void Dispose()
         {
-            if (!isDisposed)
-            {
-                if (needEnd) EndCompression();
+            if (isDisposed)
+                return;
 
-                if (compressorHandle != IntPtr.Zero)
-                    VfwApi.ICClose(compressorHandle);
+            if (needEnd) EndCompression();
 
-                isDisposed = true;
-                GC.SuppressFinalize(this);
-            }
+            if (compressorHandle != IntPtr.Zero)
+                VfwApi.ICClose(compressorHandle);
+
+            isDisposed = true;
+            GC.SuppressFinalize(this);
         }
 
-        void CheckICResult(int result)
+        static void CheckICResult(int result)
         {
             if (result != VfwApi.ICERR_OK)
                 throw new InvalidOperationException($"Encoder operation returned an error: {result}.");

@@ -178,8 +178,7 @@ namespace Screna.Audio
             var actualDuration = (long)((double)ReftimesPerSec *
                              bufferFrameCount / waveFormat.SampleRate);
 
-            int sleepMilliseconds = (int)(actualDuration / ReftimesPerMillisec / 2),
-                waitMilliseconds = (int)(3 * actualDuration / ReftimesPerMillisec);
+            var sleepMilliseconds = (int)(actualDuration / ReftimesPerMillisec / 2);
 
             var capture = client.AudioCaptureClient;
 
@@ -200,8 +199,13 @@ namespace Screna.Audio
         void RaiseRecordingStopped(Exception e)
         {
             var handler = RecordingStopped;
-            if (handler == null) return;
-            if (syncContext == null) handler(e);
+
+            if (handler == null)
+                return;
+
+            if (syncContext == null)
+                handler(e);
+
             else syncContext.Post(state => handler(e), null);
         }
 
@@ -225,10 +229,10 @@ namespace Screna.Audio
                     recordBufferOffset = 0;
                 }
 
-                var AudioClientBufferFlags_Silent = 0x2;
+                const int audioClientBufferFlagsSilent = 0x2;
 
                 // if not silence...
-                if ((flags & AudioClientBufferFlags_Silent) != AudioClientBufferFlags_Silent)
+                if ((flags & audioClientBufferFlagsSilent) != audioClientBufferFlagsSilent)
                     Marshal.Copy(buffer, recordBuffer, recordBufferOffset, bytesAvailable);
                 else Array.Clear(recordBuffer, recordBufferOffset, bytesAvailable);
 

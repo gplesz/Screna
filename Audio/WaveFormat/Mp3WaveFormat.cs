@@ -27,7 +27,7 @@ namespace Screna.Audio
         ushort ID = 1; // MPEGLAYER3_ID_MPEG
         Mp3Padding Padding;
         ushort BlockSize,
-            FramePerBlock,
+            FramesPerBlock,
             EncoderDelay;
 
         public Mp3WaveFormat(int SampleRate, int Channels, int BlockSize, int FramesPerBlock = 1, Mp3Padding Padding = Mp3Padding.Off, int EncoderDelay = 0)
@@ -37,6 +37,7 @@ namespace Screna.Audio
             extraSize = 4 * sizeof(ushort) + sizeof(uint);
 
             this.BlockSize = (ushort)BlockSize;
+            this.FramesPerBlock = (ushort)FramesPerBlock;
             this.EncoderDelay = (ushort)EncoderDelay;
             this.Padding = Padding;
         }
@@ -48,7 +49,7 @@ namespace Screna.Audio
             Writer.Write(ID); // MPEGLAYER3_ID_MPEG
             Writer.Write((int)Padding); // MPEGLAYER3_FLAG_PADDING_OFF
             Writer.Write(BlockSize); // nBlockSize
-            Writer.Write(FramePerBlock); // nFramesPerBlock
+            Writer.Write(FramesPerBlock); // nFramesPerBlock
             Writer.Write(EncoderDelay); // Encoder Delay;
         }
     }

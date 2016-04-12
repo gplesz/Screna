@@ -54,16 +54,16 @@ namespace Screna.Audio
         {
             get
             {
-                PropString result;
                 for (var i = 0; i < Count; i++)
                 {
                     var ikey = Get(i);
 
-                    if (ikey.Equals(key))
-                    {
-                        Marshal.ThrowExceptionForHR(storeInterface.GetValue(ref ikey, out result));
-                        return result.Value;
-                    }
+                    if (!ikey.Equals(key))
+                        continue;
+
+                    PropString result;
+                    Marshal.ThrowExceptionForHR(storeInterface.GetValue(ref ikey, out result));
+                    return result.Value;
                 }
 
                 return "Unknown";

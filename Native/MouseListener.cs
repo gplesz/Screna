@@ -49,13 +49,17 @@ namespace Screna.Native
         {
             var e = GetEventArgs(data);
 
-            if (e.IsMouseKeyDown) ProcessDown(ref e);
+            if (e.IsMouseKeyDown)
+                ProcessDown(ref e);
 
-            if (e.IsMouseKeyUp) ProcessUp(ref e);
+            if (e.IsMouseKeyUp)
+                ProcessUp(ref e);
 
-            if (e.WheelScrolled) ProcessWheel(ref e);
+            if (e.WheelScrolled)
+                ProcessWheel(ref e);
 
-            if (HasMoved(e.Point)) ProcessMove(ref e);
+            if (HasMoved(e.Point))
+                ProcessMove(ref e);
 
             return !e.Handled;
         }
@@ -70,15 +74,20 @@ namespace Screna.Native
 
         void ProcessDown(ref MouseEventExtArgs e)
         {
-            if (IsDoubleClick(e)) e = e.ToDoubleClickEventArgs();
+            if (IsDoubleClick(e))
+                e = e.ToDoubleClickEventArgs();
 
             OnDown(e);
             OnDownExt(e);
-            if (e.Handled) return;
 
-            if (e.Clicks == 2) m_DoubleDown.Add(e.Button);
+            if (e.Handled)
+                return;
 
-            if (e.Clicks == 1) m_SingleDown.Add(e.Button);
+            if (e.Clicks == 2)
+                m_DoubleDown.Add(e.Button);
+
+            if (e.Clicks == 1)
+                m_SingleDown.Add(e.Button);
         }
 
         void ProcessUp(ref MouseEventExtArgs e)
@@ -87,7 +96,10 @@ namespace Screna.Native
             {
                 OnUp(e);
                 OnUpExt(e);
-                if (e.Handled) return;
+
+                if (e.Handled)
+                    return;
+
                 OnClick(e);
                 m_SingleDown.Remove(e.Button);
             }

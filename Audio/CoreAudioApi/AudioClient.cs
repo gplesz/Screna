@@ -8,15 +8,14 @@ namespace Screna.Audio
     /// </summary>
     class AudioClient : IDisposable
     {
-        IAudioClient audioClientInterface;
-        WaveFormat mixFormat;
-        AudioRenderClient audioRenderClient;
-        AudioCaptureClient audioCaptureClient;
-        AudioClientShareMode shareMode;
+        IAudioClient _audioClientInterface;
+        WaveFormat _mixFormat;
+        AudioRenderClient _audioRenderClient;
+        AudioCaptureClient _audioCaptureClient;
 
         public AudioClient(IAudioClient audioClientInterface)
         {
-            this.audioClientInterface = audioClientInterface;
+            _audioClientInterface = audioClientInterface;
         }
 
         /// <summary>
@@ -27,15 +26,15 @@ namespace Screna.Audio
         {
             get
             {
-                if (mixFormat == null)
+                if (_mixFormat == null)
                 {
                     IntPtr waveFormatPointer;
-                    Marshal.ThrowExceptionForHR(audioClientInterface.GetMixFormat(out waveFormatPointer));
+                    Marshal.ThrowExceptionForHR(_audioClientInterface.GetMixFormat(out waveFormatPointer));
                     var waveFormat = WaveFormat.MarshalFromPtr(waveFormatPointer);
                     Marshal.FreeCoTaskMem(waveFormatPointer);
-                    mixFormat = waveFormat;
+                    _mixFormat = waveFormat;
                 }
-                return mixFormat;
+                return _mixFormat;
             }
         }
 
@@ -50,11 +49,10 @@ namespace Screna.Audio
         /// <param name="audioSessionGuid">Audio Session GUID (can be null)</param>
         public void Initialize(AudioClientShareMode shareMode, int streamFlags, long bufferDuration, long periodicity, WaveFormat waveFormat, Guid audioSessionGuid)
         {
-            this.shareMode = shareMode;
-            var hresult = audioClientInterface.Initialize(shareMode, streamFlags, bufferDuration, periodicity, waveFormat, ref audioSessionGuid);
+            var hresult = _audioClientInterface.Initialize(shareMode, streamFlags, bufferDuration, periodicity, waveFormat, ref audioSessionGuid);
             Marshal.ThrowExceptionForHR(hresult);
             // may have changed the mix format so reset it
-            mixFormat = null;
+            _mixFormat = null;
         }
 
         /// <summary>
@@ -65,7 +63,7 @@ namespace Screna.Audio
             get
             {
                 uint bufferSize;
-                Marshal.ThrowExceptionForHR(audioClientInterface.GetBufferSize(out bufferSize));
+                Marshal.ThrowExceptionForHR(_audioClientInterface.GetBufferSize(out bufferSize));
                 return (int)bufferSize;
             }
         }
@@ -73,7 +71,7 @@ namespace Screna.Audio
         /// <summary>
         /// Retrieves the maximum latency for the current stream and can be called any time after the stream has been initialized.
         /// </summary>
-        public long StreamLatency => audioClientInterface.GetStreamLatency();
+        public long StreamLatency => _audioClientInterface.GetStreamLatency();
 
         /// <summary>
         /// Retrieves the number of frames of padding in the endpoint buffer (must initialize first)
@@ -83,7 +81,7 @@ namespace Screna.Audio
             get
             {
                 int currentPadding;
-                Marshal.ThrowExceptionForHR(audioClientInterface.GetCurrentPadding(out currentPadding));
+                Marshal.ThrowExceptionForHR(_audioClientInterface.GetCurrentPadding(out currentPadding));
                 return currentPadding;
             }
         }
@@ -95,14 +93,14 @@ namespace Screna.Audio
         {
             get
             {
-                if (audioRenderClient == null)
+                if (_audioRenderClient == null)
                 {
                     object audioRenderClientInterface;
                     var audioRenderClientGuid = new Guid("F294ACFC-3146-4483-A7BF-ADDCA7C260E2");
-                    Marshal.ThrowExceptionForHR(audioClientInterface.GetService(audioRenderClientGuid, out audioRenderClientInterface));
-                    audioRenderClient = new AudioRenderClient((IAudioRenderClient)audioRenderClientInterface);
+                    Marshal.ThrowExceptionForHR(_audioClientInterface.GetService(audioRenderClientGuid, out audioRenderClientInterface));
+                    _audioRenderClient = new AudioRenderClient((IAudioRenderClient)audioRenderClientInterface);
                 }
-                return audioRenderClient;
+                return _audioRenderClient;
             }
         }
 
@@ -113,14 +111,14 @@ namespace Screna.Audio
         {
             get
             {
-                if (audioCaptureClient == null)
+                if (_audioCaptureClient == null)
                 {
                     object audioCaptureClientInterface;
                     var audioCaptureClientGuid = new Guid("c8adbd64-e71e-48a0-a4de-185c395cd317");
-                    Marshal.ThrowExceptionForHR(audioClientInterface.GetService(audioCaptureClientGuid, out audioCaptureClientInterface));
-                    audioCaptureClient = new AudioCaptureClient((IAudioCaptureClient)audioCaptureClientInterface);
+                    Marshal.ThrowExceptionForHR(_audioClientInterface.GetService(audioCaptureClientGuid, out audioCaptureClientInterface));
+                    _audioCaptureClient = new AudioCaptureClient((IAudioCaptureClient)audioCaptureClientInterface);
                 }
-                return audioCaptureClient;
+                return _audioCaptureClient;
             }
         }
 
@@ -145,16 +143,16 @@ namespace Screna.Audio
         /// <returns>True if the format is supported</returns>
         public bool IsFormatSupported(AudioClientShareMode shareMode, WaveFormat desiredFormat, out WaveFormatExtensible closestMatchFormat)
         {
-            var hresult = audioClientInterface.IsFormatSupported(shareMode, desiredFormat, out closestMatchFormat);
+            var hresult = _audioClientInterface.IsFormatSupported(shareMode, desiredFormat, out closestMatchFormat);
             
-            const int UnsupportedFormat = unchecked((int)0x88890008);
+            const int unsupportedFormat = unchecked((int)0x88890008);
 
             switch (hresult)
             {
                 case 0:
                     return true;
                 case 1:
-                case UnsupportedFormat:
+                case unsupportedFormat:
                     return false;
                 default:
                     throw new Exception(hresult.ToString());
@@ -164,18 +162,18 @@ namespace Screna.Audio
         /// <summary>
         /// Starts the audio stream
         /// </summary>
-        public void Start() => audioClientInterface.Start();
+        public void Start() => _audioClientInterface.Start();
 
         /// <summary>
         /// Stops the audio stream.
         /// </summary>
-        public void Stop() => audioClientInterface.Stop();
+        public void Stop() => _audioClientInterface.Stop();
 
         /// <summary>
         /// Set the Event Handle for buffer synchro.
         /// </summary>
         /// <param name="eventWaitHandle">The Wait Handle to setup</param>
-        public void SetEventHandle(IntPtr eventWaitHandle) => audioClientInterface.SetEventHandle(eventWaitHandle);
+        public void SetEventHandle(IntPtr eventWaitHandle) => _audioClientInterface.SetEventHandle(eventWaitHandle);
 
         /// <summary>
         /// Resets the audio stream
@@ -183,28 +181,28 @@ namespace Screna.Audio
         /// Resetting the stream flushes all pending data and resets the audio clock stream 
         /// position to 0. This method fails if it is called on a stream that is not stopped
         /// </summary>
-        public void Reset() => audioClientInterface.Reset();
+        public void Reset() => _audioClientInterface.Reset();
 
         public void Dispose()
         {
-            if (audioClientInterface != null)
+            if (_audioClientInterface == null)
+                return;
+
+            if (_audioRenderClient != null)
             {
-                if (audioRenderClient != null)
-                {
-                    audioRenderClient.Dispose();
-                    audioRenderClient = null;
-                }
-         
-                if (audioCaptureClient != null)
-                {
-                    audioCaptureClient.Dispose();
-                    audioCaptureClient = null;
-                }
-                
-                Marshal.ReleaseComObject(audioClientInterface);
-                audioClientInterface = null;
-                GC.SuppressFinalize(this);
+                _audioRenderClient.Dispose();
+                _audioRenderClient = null;
             }
+         
+            if (_audioCaptureClient != null)
+            {
+                _audioCaptureClient.Dispose();
+                _audioCaptureClient = null;
+            }
+                
+            Marshal.ReleaseComObject(_audioClientInterface);
+            _audioClientInterface = null;
+            GC.SuppressFinalize(this);
         }
     }
 }

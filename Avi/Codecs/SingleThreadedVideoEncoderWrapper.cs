@@ -44,7 +44,8 @@ namespace Screna.Avi
             dispatcher = Dispatcher.FromThread(thread);
 
             // TODO: Create encoder on the first frame
-            encoder = dispatcher.Invoke(encoderFactory);
+            encoder = dispatcher?.Invoke(encoderFactory);
+
             if (encoder == null)
                 throw new InvalidOperationException("Encoder factory has created no instance.");
         }
@@ -110,7 +111,6 @@ namespace Screna.Avi
         static void RunDispatcher(object parameter)
         {
             var dispatcherCreated = (AutoResetEvent)parameter;
-            var dispatcher = Dispatcher.CurrentDispatcher;
             dispatcherCreated.Set();
 
             Dispatcher.Run();

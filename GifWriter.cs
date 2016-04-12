@@ -31,13 +31,13 @@ namespace Screna
             FileVersion = "89a";
         #endregion
 
-        BinaryWriter Writer;
-        bool FirstFrame = true;
-        readonly object SyncLock = new object();
+        readonly BinaryWriter _writer;
+        bool _firstFrame = true;
+        readonly object _syncLock = new object();
 
         public GifWriter(Stream OutStream, int DefaultFrameDelay = 500, int Repeat = -1)
         {
-            Writer = new BinaryWriter(OutStream);
+            _writer = new BinaryWriter(OutStream);
             this.DefaultFrameDelay = DefaultFrameDelay;
             this.Repeat = Repeat;
         }
@@ -59,7 +59,7 @@ namespace Screna
         /// The Number of Times the Animation must repeat.
         /// -1 indicates no repeat. 0 indicates repeat indefinitely
         /// </summary>
-        public int Repeat { get; private set; }
+        public int Repeat { get; }
         #endregion
 
         public int FrameRate => 1000 / DefaultFrameDelay;
@@ -74,19 +74,19 @@ namespace Screna
         /// <param name="YOffset">The positioning y offset this image should be displayed at.</param>
         public void WriteFrame(Image Image, int Delay = 0)
         {
-            lock (SyncLock)
+            lock (_syncLock)
                 using (var gifStream = new MemoryStream())
                 {
                     Image.Save(gifStream, ImageFormat.Gif);
 
                     // Steal the global color table info
-                    if (FirstFrame) InitHeader(gifStream, Writer, Image.Width, Image.Height);
+                    if (_firstFrame) InitHeader(gifStream, _writer, Image.Width, Image.Height);
 
-                    WriteGraphicControlBlock(gifStream, Writer, Delay == 0 ? DefaultFrameDelay : Delay);
-                    WriteImageBlock(gifStream, Writer, !FirstFrame, 0, 0, Image.Width, Image.Height);
+                    WriteGraphicControlBlock(gifStream, _writer, Delay == 0 ? DefaultFrameDelay : Delay);
+                    WriteImageBlock(gifStream, _writer, !_firstFrame, 0, 0, Image.Width, Image.Height);
                 }
 
-            if (FirstFrame) FirstFrame = false;
+            if (_firstFrame) _firstFrame = false;
         }
 
         public Task WriteFrameAsync(Bitmap Image, int Delay = 0) => Task.Factory.StartNew(() => WriteFrame(Image, Delay));
@@ -188,10 +188,10 @@ namespace Screna
         public void Dispose()
         {
             // Complete File
-            Writer.Write(FileTrailer);
+            _writer.Write(FileTrailer);
 
-            Writer.BaseStream.Dispose();
-            Writer.Dispose();
+            _writer.BaseStream.Dispose();
+            _writer.Dispose();
         }
     }
 }

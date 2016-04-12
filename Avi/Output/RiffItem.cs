@@ -9,7 +9,7 @@
 
         public RiffItem(long dataStart, int dataSize = -1)
         {
-            this.DataStart = dataStart;
+            DataStart = dataStart;
             DataSize = dataSize;
         }
 

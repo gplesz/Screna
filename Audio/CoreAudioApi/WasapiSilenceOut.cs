@@ -58,21 +58,20 @@ namespace Screna.Audio
                 bufferFrameCount = audioClient.BufferSize;
                 bytesPerFrame = outputFormat.Channels * outputFormat.BitsPerSample / 8;
                 FillBuffer(bufferFrameCount);
-
-                // Create WaitHandle for sync
-                var waitHandles = new WaitHandle[] { frameEventWaitHandle };
-
+                
                 audioClient.Start();
 
                 while (playbackState != PlaybackState.Stopped)
                 {
                     // If still playing and notification is ok
-                    if (frameEventWaitHandle.WaitOne(3 * latencyMilliseconds) && playbackState == PlaybackState.Playing)
-                    {
-                        // See how much buffer space is available.
-                        var numFramesAvailable = bufferFrameCount - audioClient.CurrentPadding;
-                        if (numFramesAvailable > 10) FillBuffer(numFramesAvailable);
-                    }
+                    if (!frameEventWaitHandle.WaitOne(3*latencyMilliseconds) || playbackState != PlaybackState.Playing)
+                        continue;
+
+                    // See how much buffer space is available.
+                    var numFramesAvailable = bufferFrameCount - audioClient.CurrentPadding;
+
+                    if (numFramesAvailable > 10)
+                        FillBuffer(numFramesAvailable);
                 }
 
                 Thread.Sleep(latencyMilliseconds / 2);
@@ -105,26 +104,31 @@ namespace Screna.Audio
 
         public void Play()
         {
-            if (playbackState != PlaybackState.Playing)
+            switch (playbackState)
             {
-                if (playbackState == PlaybackState.Stopped)
-                {
+                case PlaybackState.Playing:
+                    return;
+
+                case PlaybackState.Stopped:
                     playThread = new Thread(PlayThread);
                     playbackState = PlaybackState.Playing;
                     playThread.Start();
-                }
-                else playbackState = PlaybackState.Playing;
+                    break;
+
+                default:
+                    playbackState = PlaybackState.Playing;
+                    break;
             }
         }
 
         public void Stop()
         {
-            if (playbackState != PlaybackState.Stopped)
-            {
-                playbackState = PlaybackState.Stopped;
-                playThread.Join();
-                playThread = null;
-            }
+            if (playbackState == PlaybackState.Stopped)
+                return;
+
+            playbackState = PlaybackState.Stopped;
+            playThread.Join();
+            playThread = null;
         }
 
         public void Pause()
@@ -135,14 +139,14 @@ namespace Screna.Audio
 
         public void Dispose()
         {
-            if (audioClient != null)
-            {
-                Stop();
+            if (audioClient == null)
+                return;
 
-                audioClient.Dispose();
-                audioClient = null;
-                renderClient = null;
-            }
+            Stop();
+
+            audioClient.Dispose();
+            audioClient = null;
+            renderClient = null;
         }
     }
 }

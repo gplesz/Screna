@@ -21,7 +21,7 @@ namespace Screna.Audio
         public WaveFileWriter(Stream outStream, WaveFormat format)
         {
             this.outStream = outStream;
-            this.WaveFormat = format;
+            WaveFormat = format;
             writer = new BinaryWriter(outStream, System.Text.Encoding.UTF8);
             writer.Write(System.Text.Encoding.UTF8.GetBytes("RIFF"));
             writer.Write(0); // placeholder
@@ -154,7 +154,7 @@ namespace Screna.Audio
                 case 16:
                     for (var sample = 0; sample < count; sample++)
                         writer.Write(samples[sample + offset]);
-                    dataChunkSize += (count * 2);
+                    dataChunkSize += count * 2;
                     break;
 
                 case 24:
@@ -167,7 +167,7 @@ namespace Screna.Audio
                         value24[2] = value[3];
                         writer.Write(value24);
                     }
-                    dataChunkSize += (count * 3);
+                    dataChunkSize += count * 3;
                     break;
 
                 default:
@@ -175,14 +175,14 @@ namespace Screna.Audio
                     {
                         for (var sample = 0; sample < count; sample++)
                             writer.Write(ushort.MaxValue * samples[sample + offset]);
-                        dataChunkSize += (count * 4);
+                        dataChunkSize += count * 4;
                     }
                     // IEEE float data
                     else if (WaveFormat.BitsPerSample == 32 && WaveFormat.Encoding == WaveFormatEncoding.Float)
                     {
                         for (var sample = 0; sample < count; sample++)
                             writer.Write(samples[sample + offset] / (float)(short.MaxValue + 1));
-                        dataChunkSize += (count * 4);
+                        dataChunkSize += count * 4;
                     }
                     else throw new InvalidOperationException("Only 16, 24 or 32 bit PCM or IEEE float audio data supported");
                     break;
@@ -240,12 +240,12 @@ namespace Screna.Audio
             // UpdateFactChunk
             if (HasFactChunk)
             {
-                var bitsPerSample = (WaveFormat.BitsPerSample * WaveFormat.Channels);
+                var bitsPerSample = WaveFormat.BitsPerSample * WaveFormat.Channels;
                 if (bitsPerSample != 0)
                 {
                     writer.Seek((int)factSampleCountPos, SeekOrigin.Begin);
 
-                    writer.Write((int)((dataChunkSize * 8) / bitsPerSample));
+                    writer.Write((int)(dataChunkSize * 8 / bitsPerSample));
                 }
             }
 

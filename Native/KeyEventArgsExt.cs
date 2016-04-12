@@ -4,13 +4,12 @@ using System.Windows.Forms;
 namespace Screna.Native
 {
     /// <summary>
-    ///     Provides extended argument data for the <see cref='KeyListener.KeyDown' /> or
-    ///     <see cref='KeyListener.KeyUp' /> event.
+    /// Provides extended argument data for the <see cref='KeyListener.KeyDown' /> or <see cref='KeyListener.KeyUp' /> event.
     /// </summary>
     public class KeyEventArgsExt : KeyEventArgs
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="KeyEventArgsExt" /> class.
+        /// Initializes a new instance of the <see cref="KeyEventArgsExt" /> class.
         /// </summary>
         /// <param name="keyData"></param>
         public KeyEventArgsExt(Keys keyData) : base(keyData) { }
@@ -47,8 +46,8 @@ namespace Screna.Native
             var keyData = AppendModifierStates((Keys)keyboardHookStruct.VirtualKeyCode);
 
             var keyCode = (WindowsMessage)wParam;
-            var isKeyDown = (keyCode == WindowsMessage.WM_KEYDOWN || keyCode == WindowsMessage.WM_SYSKEYDOWN);
-            var isKeyUp = (keyCode == WindowsMessage.WM_KEYUP || keyCode == WindowsMessage.WM_SYSKEYUP);
+            var isKeyDown = keyCode == WindowsMessage.WM_KEYDOWN || keyCode == WindowsMessage.WM_SYSKEYDOWN;
+            var isKeyUp = keyCode == WindowsMessage.WM_KEYUP || keyCode == WindowsMessage.WM_SYSKEYUP;
 
             return new KeyEventArgsExt(keyData, keyboardHookStruct.Time, isKeyDown, isKeyUp);
         }

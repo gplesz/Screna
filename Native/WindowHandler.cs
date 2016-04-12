@@ -42,7 +42,7 @@ namespace Screna
         {
             foreach (var hWnd in from win in Enumerate() let hWnd = win.Handle where win.IsVisible select hWnd)
             {
-                if (!(User32.GetWindowLong(hWnd, GetWindowLongValue.GWL_EXSTYLE).HasFlag(WindowStyles.WS_EX_APPWINDOW)))
+                if (!User32.GetWindowLong(hWnd, GetWindowLongValue.GWL_EXSTYLE).HasFlag(WindowStyles.WS_EX_APPWINDOW))
                 {
                     if (User32.GetWindow(hWnd, GetWindowEnum.Owner) != IntPtr.Zero)
                         continue;

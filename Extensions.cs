@@ -16,10 +16,10 @@ namespace Screna
         {
             if (PreserveTransparency)
             {
-                using (var PngStream = new MemoryStream())
+                using (var pngStream = new MemoryStream())
                 {
-                    BMP.Save(PngStream, ImageFormat.Png);
-                    var pngClipboardData = new DataObject("PNG", PngStream);
+                    BMP.Save(pngStream, ImageFormat.Png);
+                    var pngClipboardData = new DataObject("PNG", pngStream);
 
                     using (var whiteS = new Bitmap(BMP.Width, BMP.Height, PixelFormat.Format24bppRgb))
                     {
@@ -55,11 +55,9 @@ namespace Screna
 
             using (var b = new UnsafeBitmap(Image))
             {
-                PixelData* pixel;
-
                 for (int x = 0, y = 0; ; )
                 {
-                    pixel = b[x, y];
+                    var pixel = b[x, y];
 
                     if (r.Left == -1)
                     {
@@ -160,7 +158,7 @@ namespace Screna
             if (r.Left >= r.Right || r.Top >= r.Bottom)
                 return null;
 
-            Bitmap final = Image.Clone(r.ToRectangle(), Image.PixelFormat);
+            var final = Image.Clone(r.ToRectangle(), Image.PixelFormat);
 
             Image.Dispose();
 
@@ -249,9 +247,9 @@ namespace Screna
 
                 while (src < sourceEnd)
                 {
-                    *(dest++) = *(src++);
-                    *(dest++) = *(src++);
-                    *(dest++) = *(src++);
+                    *dest++ = *src++;
+                    *dest++ = *src++;
+                    *dest++ = *src++;
                     src++;
                 }
             }

@@ -109,16 +109,16 @@ namespace Screna.Audio
         /// <summary>
         /// Writes this WaveFormat object to a stream
         /// </summary>
-        /// <param name="writer">the output stream</param>
-        public virtual void Serialize(BinaryWriter writer)
+        /// <param name="Writer">the output stream</param>
+        public virtual void Serialize(BinaryWriter Writer)
         {
-            writer.Write((short)Encoding);
-            writer.Write((short)Channels);
-            writer.Write(SampleRate);
-            writer.Write(AverageBytesPerSecond);
-            writer.Write((short)BlockAlign);
-            writer.Write((short)BitsPerSample);
-            writer.Write((short)ExtraSize);
+            Writer.Write((short)Encoding);
+            Writer.Write((short)Channels);
+            Writer.Write(SampleRate);
+            Writer.Write(AverageBytesPerSecond);
+            Writer.Write((short)BlockAlign);
+            Writer.Write((short)BitsPerSample);
+            Writer.Write((short)ExtraSize);
         }
 
         /// <summary>

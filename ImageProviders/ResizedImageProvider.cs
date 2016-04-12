@@ -6,47 +6,47 @@ namespace Screna
 {
     public class ResizedImageProvider : IImageProvider
     {
-        readonly float ResizeWidth, ResizeHeight;
+        readonly float _resizeWidth, _resizeHeight;
 
-        readonly IImageProvider ImageSource;
-        readonly Color BackgroundColor;
+        readonly IImageProvider _imageSource;
+        readonly Color _backgroundColor;
 
         public ResizedImageProvider(IImageProvider ImageSource, int TargetWidth, int TargetHeight, Color BackgroundColor)
         {
-            this.ImageSource = ImageSource;
-            this.BackgroundColor = BackgroundColor;
+            _imageSource = ImageSource;
+            _backgroundColor = BackgroundColor;
 
-            this.Height = TargetHeight;
-            this.Width = TargetWidth;
+            Height = TargetHeight;
+            Width = TargetWidth;
 
-            int OriginalWidth = ImageSource.Width,
-                OriginalHeight = ImageSource.Height;
+            int originalWidth = ImageSource.Width,
+                originalHeight = ImageSource.Height;
 
-            var Ratio = Math.Min((float)TargetWidth / OriginalWidth, (float)TargetHeight / OriginalHeight);
+            var ratio = Math.Min((float)TargetWidth / originalWidth, (float)TargetHeight / originalHeight);
 
-            ResizeWidth = OriginalWidth * Ratio;
-            ResizeHeight = OriginalHeight * Ratio;
+            _resizeWidth = originalWidth * ratio;
+            _resizeHeight = originalHeight * ratio;
         }
 
         public Bitmap Capture()
         {
-            var BMP = ImageSource.Capture();
+            var bmp = _imageSource.Capture();
 
-            var ResizedBMP = new Bitmap(Width, Height);
+            var resizedBmp = new Bitmap(Width, Height);
 
-            using (var g = Graphics.FromImage(ResizedBMP))
+            using (var g = Graphics.FromImage(resizedBmp))
             {
                 g.CompositingQuality = CompositingQuality.HighQuality;
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.SmoothingMode = SmoothingMode.HighQuality;
 
-                if (BackgroundColor != Color.Transparent)
-                    g.FillRectangle(new SolidBrush(BackgroundColor), 0, 0, Width, Height);
+                if (_backgroundColor != Color.Transparent)
+                    g.FillRectangle(new SolidBrush(_backgroundColor), 0, 0, Width, Height);
 
-                g.DrawImage(BMP, 0, 0, ResizeWidth, ResizeHeight);
+                g.DrawImage(bmp, 0, 0, _resizeWidth, _resizeHeight);
             }
 
-            return ResizedBMP;
+            return resizedBmp;
         }
 
         public int Height { get; }

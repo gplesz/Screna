@@ -189,7 +189,7 @@ namespace Screna.Native
             return m_KeyboardStateNative[virtualKeyCode];
         }
 
-        static bool GetHighBit(byte value) => (value >> 7) != 0;
+        static bool GetHighBit(byte value) => value >> 7 != 0;
 
         static bool GetLowBit(byte value) => (value & 1) != 0;
     }

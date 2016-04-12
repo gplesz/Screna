@@ -10,11 +10,11 @@ namespace Screna
     /// </summary>
     public class MouseCursor : IOverlay
     {
-        const int CURSOR_SHOWING = 1;
+        const int CursorShowing = 1;
 
-        IconInfo icInfo;
-        IntPtr hIcon;
-        CursorInfo CursorInfo;
+        IconInfo _icInfo;
+        IntPtr _hIcon;
+        CursorInfo _cursorInfo;
 
         public MouseCursor(bool Include = true) { this.Include = Include; }
 
@@ -22,9 +22,9 @@ namespace Screna
         {
             get
             {
-                var P = new Point();
-                User32.GetCursorPos(ref P);
-                return P;
+                var p = new Point();
+                User32.GetCursorPos(ref p);
+                return p;
             }
         }
 
@@ -32,30 +32,30 @@ namespace Screna
 
         public void Draw(Graphics g, Point Offset = default(Point))
         {
-            if (Include)
-            {
-                CursorInfo = new CursorInfo { cbSize = Marshal.SizeOf(typeof(CursorInfo)) };
+            if (!Include)
+                return;
 
-                if (!User32.GetCursorInfo(out CursorInfo))
-                    return;
+            _cursorInfo = new CursorInfo { cbSize = Marshal.SizeOf(typeof(CursorInfo)) };
 
-                if (CursorInfo.flags != CURSOR_SHOWING)
-                    return;
+            if (!User32.GetCursorInfo(out _cursorInfo))
+                return;
 
-                hIcon = User32.CopyIcon(CursorInfo.hCursor);
+            if (_cursorInfo.flags != CursorShowing)
+                return;
 
-                if (!User32.GetIconInfo(hIcon, out icInfo))
-                    return;
+            _hIcon = User32.CopyIcon(_cursorInfo.hCursor);
 
-                var Location = new Point(CursorInfo.ptScreenPos.X - Offset.X - icInfo.xHotspot,
-                    CursorInfo.ptScreenPos.Y - Offset.Y - icInfo.yHotspot);
+            if (!User32.GetIconInfo(_hIcon, out _icInfo))
+                return;
 
-                if (hIcon != IntPtr.Zero)
-                    using (var CursorBMP = Icon.FromHandle(hIcon).ToBitmap())
-                        g.DrawImage(CursorBMP, new Rectangle(Location, CursorBMP.Size));
+            var location = new Point(_cursorInfo.ptScreenPos.X - Offset.X - _icInfo.xHotspot,
+                _cursorInfo.ptScreenPos.Y - Offset.Y - _icInfo.yHotspot);
 
-                User32.DestroyIcon(hIcon);
-            }
+            if (_hIcon != IntPtr.Zero)
+                using (var cursorBmp = Icon.FromHandle(_hIcon).ToBitmap())
+                    g.DrawImage(cursorBmp, new Rectangle(location, cursorBmp.Size));
+
+            User32.DestroyIcon(_hIcon);
         }
 
         public void Dispose() { }

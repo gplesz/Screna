@@ -9,60 +9,63 @@ namespace Screna
     public class Recorder : IRecorder
     {
         #region Fields
-        IAudioProvider AudioProvider = null;
-        IVideoFileWriter VideoEncoder = null;
-        IImageProvider ImageProvider = null;
+        IAudioProvider _audioProvider;
+        IVideoFileWriter _videoEncoder;
+        IImageProvider _imageProvider;
 
-        Thread RecordThread;
+        Thread _recordThread;
 
-        ManualResetEvent StopCapturing = new ManualResetEvent(false),
-            ContinueCapturing = new ManualResetEvent(false);
-        AutoResetEvent VideoFrameWritten = new AutoResetEvent(false),
-            AudioBlockWritten = new AutoResetEvent(false);
+        ManualResetEvent _stopCapturing = new ManualResetEvent(false),
+            _continueCapturing = new ManualResetEvent(false);
 
-        SynchronizationContext syncContext;
+        readonly AutoResetEvent _videoFrameWritten = new AutoResetEvent(false),
+            _audioBlockWritten = new AutoResetEvent(false);
+
+        readonly SynchronizationContext _syncContext;
         #endregion
 
         ~Recorder() { Stop(); }
 
         public event Action<Exception> RecordingStopped;
 
-        void RaiseRecordingStopped(Exception e)
+        void RaiseRecordingStopped(Exception E)
         {
             var handler = RecordingStopped;
 
-            if (handler != null)
-            {
-                if (syncContext != null) syncContext.Post(s => handler(e), null);
-                else handler(e);
-            }
+            if (handler == null)
+                return;
+
+            if (_syncContext != null)
+                _syncContext.Post(S => handler(E), null);
+
+            else handler(E);
         }
 
         public Recorder(IVideoFileWriter Encoder, IImageProvider ImageProvider, IAudioProvider AudioProvider = null)
         {
             // Init Fields
-            this.ImageProvider = ImageProvider;
-            VideoEncoder = Encoder;
-            this.AudioProvider = AudioProvider;
+            _imageProvider = ImageProvider;
+            _videoEncoder = Encoder;
+            _audioProvider = AudioProvider;
 
-            syncContext = SynchronizationContext.Current;
+            _syncContext = SynchronizationContext.Current;
 
             // Audio Init
-            if (VideoEncoder.RecordsAudio
+            if (_videoEncoder.RecordsAudio
                 && AudioProvider != null)
                 AudioProvider.DataAvailable += AudioDataAvailable;
-            else this.AudioProvider = null;
+            else _audioProvider = null;
 
             // RecordThread Init
             if (ImageProvider != null)
-                RecordThread = new Thread(Record)
+                _recordThread = new Thread(Record)
                 {
                     Name = "Captura.Record",
                     IsBackground = true
                 };
 
             // Not Actually Started, Waits for ContinueThread to be Set
-            RecordThread?.Start();
+            _recordThread?.Start();
         }
 
         public void Start(int Delay = 0)
@@ -73,141 +76,141 @@ namespace Screna
                     {
                         Thread.Sleep(Delay);
 
-                        if (RecordThread != null)
-                            ContinueCapturing.Set();
+                        if (_recordThread != null)
+                            _continueCapturing.Set();
 
-                        if (AudioProvider != null)
-                        {
-                            VideoFrameWritten.Set();
-                            AudioBlockWritten.Reset();
+                        if (_audioProvider == null)
+                            return;
 
-                            AudioProvider.Start();
-                        }
+                        _videoFrameWritten.Set();
+                        _audioBlockWritten.Reset();
+
+                        _audioProvider.Start();
                     }
-                    catch (Exception E) { RaiseRecordingStopped(E); }
+                    catch (Exception e) { RaiseRecordingStopped(e); }
                 }).Start();
         }
 
         public void Pause()
         {
-            if (RecordThread != null)
-                ContinueCapturing.Reset();
+            if (_recordThread != null)
+                _continueCapturing.Reset();
 
-            AudioProvider?.Stop();
+            _audioProvider?.Stop();
         }
 
         public void Stop()
         {
             // Resume if Paused
-            ContinueCapturing?.Set();
+            _continueCapturing?.Set();
 
             // Video
-            if (RecordThread != null)
+            if (_recordThread != null)
             {
-                if (StopCapturing != null
-                    && !StopCapturing.SafeWaitHandle.IsClosed)
-                    StopCapturing.Set();
+                if (_stopCapturing != null
+                    && !_stopCapturing.SafeWaitHandle.IsClosed)
+                    _stopCapturing.Set();
 
-                if (!RecordThread.Join(500))
-                    RecordThread.Abort();
+                if (!_recordThread.Join(500))
+                    _recordThread.Abort();
 
-                RecordThread = null;
+                _recordThread = null;
             }
 
-            if (ImageProvider != null)
+            if (_imageProvider != null)
             {
-                ImageProvider.Dispose();
-                ImageProvider = null;
+                _imageProvider.Dispose();
+                _imageProvider = null;
             }
 
             // Audio Source
-            if (AudioProvider != null)
+            if (_audioProvider != null)
             {
-                AudioProvider.Dispose();
-                AudioProvider = null;
+                _audioProvider.Dispose();
+                _audioProvider = null;
             }
 
             // WaitHandles
-            if (StopCapturing != null
-                && !StopCapturing.SafeWaitHandle.IsClosed)
+            if (_stopCapturing != null
+                && !_stopCapturing.SafeWaitHandle.IsClosed)
             {
-                StopCapturing.Dispose();
-                StopCapturing = null;
+                _stopCapturing.Dispose();
+                _stopCapturing = null;
             }
 
-            if (ContinueCapturing != null
-                && !ContinueCapturing.SafeWaitHandle.IsClosed)
+            if (_continueCapturing != null
+                && !_continueCapturing.SafeWaitHandle.IsClosed)
             {
-                ContinueCapturing.Dispose();
-                ContinueCapturing = null;
+                _continueCapturing.Dispose();
+                _continueCapturing = null;
             }
 
             // Writers
-            if (VideoEncoder == null)
+            if (_videoEncoder == null)
                 return;
 
-            VideoEncoder.Dispose();
-            VideoEncoder = null;
+            _videoEncoder.Dispose();
+            _videoEncoder = null;
         }
 
         void Record()
         {
             try
             {
-                var FrameInterval = TimeSpan.FromSeconds(1 / (double)VideoEncoder.FrameRate);
-                Task FrameWriteTask = null;
-                var TimeTillNextFrame = TimeSpan.Zero;
+                var frameInterval = TimeSpan.FromSeconds(1 / (double)_videoEncoder.FrameRate);
+                Task frameWriteTask = null;
+                var timeTillNextFrame = TimeSpan.Zero;
 
-                while (!StopCapturing.WaitOne(TimeTillNextFrame)
-                    && ContinueCapturing.WaitOne())
+                while (!_stopCapturing.WaitOne(timeTillNextFrame)
+                    && _continueCapturing.WaitOne())
                 {
-                    var Timestamp = DateTime.Now;
+                    var timestamp = DateTime.Now;
 
-                    var Frame = ImageProvider.Capture();
+                    var frame = _imageProvider.Capture();
 
                     // Wait for the previous frame is written
-                    if (FrameWriteTask != null)
+                    if (frameWriteTask != null)
                     {
-                        FrameWriteTask.Wait();
-                        VideoFrameWritten.Set();
+                        frameWriteTask.Wait();
+                        _videoFrameWritten.Set();
                     }
 
-                    if (AudioProvider != null
-                        && AudioProvider.IsSynchronizable)
-                        if (WaitHandle.WaitAny(new WaitHandle[] { AudioBlockWritten, StopCapturing }) == 1)
+                    if (_audioProvider != null
+                        && _audioProvider.IsSynchronizable)
+                        if (WaitHandle.WaitAny(new WaitHandle[] { _audioBlockWritten, _stopCapturing }) == 1)
                             break;
 
                     // Start asynchronous (encoding and) writing of the new frame
-                    FrameWriteTask = VideoEncoder.WriteFrameAsync(Frame);
+                    frameWriteTask = _videoEncoder.WriteFrameAsync(frame);
 
-                    TimeTillNextFrame = Timestamp + FrameInterval - DateTime.Now;
-                    if (TimeTillNextFrame < TimeSpan.Zero)
-                        TimeTillNextFrame = TimeSpan.Zero;
+                    timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
+                    if (timeTillNextFrame < TimeSpan.Zero)
+                        timeTillNextFrame = TimeSpan.Zero;
                 }
 
                 // Wait for the last frame is written
-                FrameWriteTask?.Wait();
+                frameWriteTask?.Wait();
             }
-            catch (Exception E)
+            catch (Exception e)
             {
                 Stop();
 
-                RaiseRecordingStopped(E);
+                RaiseRecordingStopped(e);
             }
         }
 
         void AudioDataAvailable(byte[] Buffer, int BytesRecorded)
         {
-            if (AudioProvider.IsSynchronizable)
+            if (_audioProvider.IsSynchronizable)
             {
-                if (WaitHandle.WaitAny(new WaitHandle[] {VideoFrameWritten, StopCapturing}) != 0)
+                if (WaitHandle.WaitAny(new WaitHandle[] {_videoFrameWritten, _stopCapturing}) != 0)
                     return;
 
-                VideoEncoder.WriteAudio(Buffer, BytesRecorded);
+                _videoEncoder.WriteAudio(Buffer, BytesRecorded);
 
-                AudioBlockWritten.Set();
+                _audioBlockWritten.Set();
             }
-            else VideoEncoder.WriteAudio(Buffer, BytesRecorded);
+            else _videoEncoder.WriteAudio(Buffer, BytesRecorded);
         }
     }
 }

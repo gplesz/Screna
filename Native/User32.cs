@@ -92,10 +92,10 @@ namespace Screna.Native
             VK_PACKET = 0xE7;
 
         //Used to pass Unicode characters as if they were keystrokes. The VK_PACKET key is the low word of a 32-bit Virtual Key value used for non-keyboard input methods
-        static int lastVirtualKeyCode = 0,
-            lastScanCode = 0;
+        static int lastVirtualKeyCode,
+            lastScanCode;
         static byte[] lastKeyState = new byte[255];
-        static bool lastIsDead = false;
+        static bool lastIsDead;
 
         public static void TryGetCharFromKeyboardState(int virtualKeyCode, int scanCode, int fuState, out char[] chars)
         {

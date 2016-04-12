@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Screna.Audio
@@ -14,11 +15,6 @@ namespace Screna.Audio
             MEDIASUBTYPE_IEEE_FLOAT = new Guid("00000003-0000-0010-8000-00aa00389b71");
 
         /// <summary>
-        /// Parameterless constructor for marshalling
-        /// </summary>
-        WaveFormatExtensible() { }
-
-        /// <summary>
         /// Creates a new WaveFormatExtensible for PCM or IEEE
         /// </summary>
         public WaveFormatExtensible(int rate, int bits, int channels)
@@ -29,7 +25,7 @@ namespace Screna.Audio
             wValidBitsPerSample = (short)bits;
 
             for (var i = 0; i < channels; i++)
-                dwChannelMask |= (1 << i);
+                dwChannelMask |= 1 << i;
 
             subFormat = bits == 32 ? MEDIASUBTYPE_IEEE_FLOAT : MEDIASUBTYPE_PCM;
         }
@@ -37,13 +33,13 @@ namespace Screna.Audio
         /// <summary>
         /// Serialize
         /// </summary>
-        public override void Serialize(System.IO.BinaryWriter writer)
+        public override void Serialize(BinaryWriter Writer)
         {
-            base.Serialize(writer);
-            writer.Write(wValidBitsPerSample);
-            writer.Write(dwChannelMask);
+            base.Serialize(Writer);
+            Writer.Write(wValidBitsPerSample);
+            Writer.Write(dwChannelMask);
             var guid = subFormat.ToByteArray();
-            writer.Write(guid, 0, guid.Length);
+            Writer.Write(guid, 0, guid.Length);
         }
     }
 }

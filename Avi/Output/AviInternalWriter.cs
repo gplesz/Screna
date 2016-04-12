@@ -44,25 +44,25 @@ namespace Screna.Avi
             public static readonly FourCC Movie = new FourCC("movi");
         }
 
-        readonly BinaryWriter fileWriter;
-        bool isClosed = false;
-        bool startedWriting = false;
-        readonly object syncWrite = new object();
+        readonly BinaryWriter _fileWriter;
+        bool _isClosed;
+        bool _startedWriting;
+        readonly object _syncWrite = new object();
 
-        bool isFirstRiff = true;
-        RiffItem currentRiff, currentMovie, header;
-        int riffSizeTreshold, riffAviFrameCount = -1, index1Count = 0;
-        readonly List<IAviStreamInternal> streams = new List<IAviStreamInternal>();
-        StreamInfo[] streamsInfo;
+        bool _isFirstRiff = true;
+        RiffItem _currentRiff, _currentMovie, _header;
+        int _riffSizeTreshold, _riffAviFrameCount = -1, _index1Count;
+        readonly List<IAviStreamInternal> _streams = new List<IAviStreamInternal>();
+        StreamInfo[] _streamsInfo;
 
         /// <summary>
         /// Creates a new instance of <see cref="AviInternalWriter"/>.
         /// </summary>
-        /// <param name="fileName">Path to an AVI file being written.</param>
-        public AviInternalWriter(string fileName)
+        /// <param name="FileName">Path to an AVI file being written.</param>
+        public AviInternalWriter(string FileName)
         {
-            var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
-            fileWriter = new BinaryWriter(fileStream);
+            var fileStream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
+            _fileWriter = new BinaryWriter(fileStream);
         }
 
         /// <summary>Frame rate.</summary>
@@ -72,18 +72,19 @@ namespace Screna.Avi
         /// </remarks>
         public decimal FramesPerSecond
         {
-            get { return framesPerSecond; }
+            get { return _framesPerSecond; }
             set
             {
-                lock (syncWrite)
+                lock (_syncWrite)
                 {
                     CheckNotStartedWriting();
-                    framesPerSecond = decimal.Round(value, 3);
+                    _framesPerSecond = decimal.Round(value, 3);
                 }
             }
         }
-        decimal framesPerSecond = 1;
-        uint frameRateNumerator, frameRateDenominator;
+
+        decimal _framesPerSecond = 1;
+        uint _frameRateNumerator, _frameRateDenominator;
 
         /// <summary>
         /// Whether to emit index used in AVI v1 format.
@@ -95,20 +96,21 @@ namespace Screna.Avi
         /// </remarks>
         public bool EmitIndex1
         {
-            get { return emitIndex1; }
+            get { return _emitIndex1; }
             set
             {
-                lock (syncWrite)
+                lock (_syncWrite)
                 {
                     CheckNotStartedWriting();
-                    emitIndex1 = value;
+                    _emitIndex1 = value;
                 }
             }
         }
-        bool emitIndex1;
+
+        bool _emitIndex1;
 
         /// <summary>AVI streams that have been added so far.</summary>
-        ReadOnlyCollection<IAviStreamInternal> Streams => streams.AsReadOnly();
+        ReadOnlyCollection<IAviStreamInternal> Streams => _streams.AsReadOnly();
 
         /// <summary>Adds new video stream.</summary>
         /// <param name="width">Frame's width.</param>
@@ -213,14 +215,14 @@ namespace Screna.Avi
         TStream AddStream<TStream>(Func<int, TStream> streamFactory)
             where TStream : IAviStreamInternal
         {
-            lock (syncWrite)
+            lock (_syncWrite)
             {
                 CheckNotClosed();
                 CheckNotStartedWriting();
 
                 var stream = streamFactory.Invoke(Streams.Count);
 
-                streams.Add(stream);
+                _streams.Add(stream);
 
                 return stream;
             }
@@ -233,36 +235,36 @@ namespace Screna.Avi
         {
             try
             {
-                if (!isClosed)
+                if (!_isClosed)
                 {
                     bool finishWriting;
-                    lock (syncWrite) finishWriting = startedWriting;
+                    lock (_syncWrite) finishWriting = _startedWriting;
 
                     // Call FinishWriting without holding the lock
                     // because additional writes may be performed inside
                     if (finishWriting)
-                        foreach (var stream in streams)
+                        foreach (var stream in _streams)
                             stream.FinishWriting();
 
-                    lock (syncWrite)
+                    lock (_syncWrite)
                     {
-                        if (startedWriting)
+                        if (_startedWriting)
                         {
-                            foreach (var stream in streams)
+                            foreach (var stream in _streams)
                                 FlushStreamIndex(stream);
 
                             CloseCurrentRiff();
 
                             // Rewrite header with actual data like frames count, super index, etc.
-                            fileWriter.BaseStream.Position = header.ItemStart;
+                            _fileWriter.BaseStream.Position = _header.ItemStart;
                             WriteHeader();
                         }
 
-                        fileWriter.Close();
-                        isClosed = true;
+                        _fileWriter.Close();
+                        _isClosed = true;
                     }
 
-                    foreach (var disposableStream in streams.OfType<IDisposable>())
+                    foreach (var disposableStream in _streams.OfType<IDisposable>())
                         disposableStream.Dispose();
                 }
             }
@@ -273,55 +275,55 @@ namespace Screna.Avi
 
         void CheckNotStartedWriting()
         {
-            if (startedWriting)
+            if (_startedWriting)
                 throw new InvalidOperationException("No stream information can be changed after starting to write frames.");
         }
 
-        void CheckNotClosed() { if (isClosed) throw new ObjectDisposedException(typeof(AviInternalWriter).Name); }
+        void CheckNotClosed() { if (_isClosed) throw new ObjectDisposedException(typeof(AviInternalWriter).Name); }
 
         void PrepareForWriting()
         {
-            startedWriting = true;
-            foreach (var stream in streams) stream.PrepareForWriting();
+            _startedWriting = true;
+            foreach (var stream in _streams) stream.PrepareForWriting();
 
-            Extensions.SplitFrameRate(FramesPerSecond, out frameRateNumerator, out frameRateDenominator);
+            Extensions.SplitFrameRate(FramesPerSecond, out _frameRateNumerator, out _frameRateDenominator);
 
-            streamsInfo = streams.Select(s => new StreamInfo(RIFFChunksFourCCs.IndexData(s.Index))).ToArray();
+            _streamsInfo = _streams.Select(s => new StreamInfo(RIFFChunksFourCCs.IndexData(s.Index))).ToArray();
 
-            riffSizeTreshold = RIFF_AVI_SIZE_TRESHOLD;
+            _riffSizeTreshold = RIFF_AVI_SIZE_TRESHOLD;
 
-            currentRiff = fileWriter.OpenList(RIFFListFourCCs.Avi, ListType_Riff);
+            _currentRiff = _fileWriter.OpenList(RIFFListFourCCs.Avi, ListType_Riff);
             WriteHeader();
-            currentMovie = fileWriter.OpenList(RIFFListFourCCs.Movie);
+            _currentMovie = _fileWriter.OpenList(RIFFListFourCCs.Movie);
         }
 
         void CreateNewRiffIfNeeded(int approximateSizeOfNextChunk)
         {
-            var estimatedSize = fileWriter.BaseStream.Position + approximateSizeOfNextChunk - currentRiff.ItemStart;
-            if (isFirstRiff && emitIndex1) estimatedSize += RiffItem.ITEM_HEADER_SIZE + index1Count * INDEX1_ENTRY_SIZE;
-            if (estimatedSize > riffSizeTreshold)
+            var estimatedSize = _fileWriter.BaseStream.Position + approximateSizeOfNextChunk - _currentRiff.ItemStart;
+            if (_isFirstRiff && _emitIndex1) estimatedSize += RiffItem.ITEM_HEADER_SIZE + _index1Count * INDEX1_ENTRY_SIZE;
+            if (estimatedSize > _riffSizeTreshold)
             {
                 CloseCurrentRiff();
 
-                currentRiff = fileWriter.OpenList(RIFFListFourCCs.AviExtended, ListType_Riff);
-                currentMovie = fileWriter.OpenList(RIFFListFourCCs.Movie);
+                _currentRiff = _fileWriter.OpenList(RIFFListFourCCs.AviExtended, ListType_Riff);
+                _currentMovie = _fileWriter.OpenList(RIFFListFourCCs.Movie);
             }
         }
 
         void CloseCurrentRiff()
         {
-            fileWriter.CloseItem(currentMovie);
+            _fileWriter.CloseItem(_currentMovie);
 
             // Several special actions for the first RIFF (AVI)
-            if (isFirstRiff)
+            if (_isFirstRiff)
             {
-                riffAviFrameCount = streams.OfType<IAviVideoStream>().Max(s => streamsInfo[s.Index].FrameCount);
-                if (emitIndex1) WriteIndex1();
-                riffSizeTreshold = RIFF_AVIX_SIZE_TRESHOLD;
+                _riffAviFrameCount = _streams.OfType<IAviVideoStream>().Max(s => _streamsInfo[s.Index].FrameCount);
+                if (_emitIndex1) WriteIndex1();
+                _riffSizeTreshold = RIFF_AVIX_SIZE_TRESHOLD;
             }
 
-            fileWriter.CloseItem(currentRiff);
-            isFirstRiff = false;
+            _fileWriter.CloseItem(_currentRiff);
+            _isFirstRiff = false;
         }
 
         #region IAviStreamDataHandler implementation
@@ -337,27 +339,27 @@ namespace Screna.Avi
 
         void WriteStreamFrame(AviStreamBase stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
-            lock (syncWrite)
+            lock (_syncWrite)
             {
                 CheckNotClosed();
 
-                if (!startedWriting)
+                if (!_startedWriting)
                     PrepareForWriting();
 
-                var si = streamsInfo[stream.Index];
+                var si = _streamsInfo[stream.Index];
                 if (si.SuperIndex.Count == MAX_SUPER_INDEX_ENTRIES)
                     throw new InvalidOperationException("Cannot write more frames to this stream.");
 
                 if (ShouldFlushStreamIndex(si.StandardIndex))
                     FlushStreamIndex(stream);
 
-                var shouldCreateIndex1Entry = emitIndex1 && isFirstRiff;
+                var shouldCreateIndex1Entry = _emitIndex1 && _isFirstRiff;
 
                 CreateNewRiffIfNeeded(count + (shouldCreateIndex1Entry ? INDEX1_ENTRY_SIZE : 0));
 
-                var chunk = fileWriter.OpenChunk(stream.ChunkId, count);
-                fileWriter.Write(frameData, startIndex, count);
-                fileWriter.CloseItem(chunk);
+                var chunk = _fileWriter.OpenChunk(stream.ChunkId, count);
+                _fileWriter.Write(frameData, startIndex, count);
+                _fileWriter.CloseItem(chunk);
 
                 si.OnFrameWritten(chunk.DataSize);
                 var dataSize = (uint)chunk.DataSize;
@@ -378,11 +380,11 @@ namespace Screna.Avi
                     var index1Entry = new Index1Entry
                     {
                         IsKeyFrame = isKeyFrame,
-                        DataOffset = (uint)(chunk.ItemStart - currentMovie.DataStart),
+                        DataOffset = (uint)(chunk.ItemStart - _currentMovie.DataStart),
                         DataSize = dataSize
                     };
                     si.Index1.Add(index1Entry);
-                    index1Count++;
+                    _index1Count++;
                 }
             }
         }
@@ -390,25 +392,25 @@ namespace Screna.Avi
         void IAviStreamWriteHandler.WriteStreamHeader(AviVideoStream videoStream)
         {
             // See AVISTREAMHEADER structure
-            fileWriter.Write((uint)videoStream.StreamType);
-            fileWriter.Write((uint)videoStream.Codec);
-            fileWriter.Write(0U); // StreamHeaderFlags
-            fileWriter.Write((ushort)0); // priority
-            fileWriter.Write((ushort)0); // language
-            fileWriter.Write(0U); // initial frames
-            fileWriter.Write(frameRateDenominator); // scale (frame rate denominator)
-            fileWriter.Write(frameRateNumerator); // rate (frame rate numerator)
-            fileWriter.Write(0U); // start
-            fileWriter.Write((uint)streamsInfo[videoStream.Index].FrameCount); // length
-            fileWriter.Write((uint)streamsInfo[videoStream.Index].MaxChunkDataSize); // suggested buffer size
-            fileWriter.Write(0U); // quality
-            fileWriter.Write(0U); // sample size
-            fileWriter.Write((short)0); // rectangle left
-            fileWriter.Write((short)0); // rectangle top
+            _fileWriter.Write((uint)videoStream.StreamType);
+            _fileWriter.Write((uint)videoStream.Codec);
+            _fileWriter.Write(0U); // StreamHeaderFlags
+            _fileWriter.Write((ushort)0); // priority
+            _fileWriter.Write((ushort)0); // language
+            _fileWriter.Write(0U); // initial frames
+            _fileWriter.Write(_frameRateDenominator); // scale (frame rate denominator)
+            _fileWriter.Write(_frameRateNumerator); // rate (frame rate numerator)
+            _fileWriter.Write(0U); // start
+            _fileWriter.Write((uint)_streamsInfo[videoStream.Index].FrameCount); // length
+            _fileWriter.Write((uint)_streamsInfo[videoStream.Index].MaxChunkDataSize); // suggested buffer size
+            _fileWriter.Write(0U); // quality
+            _fileWriter.Write(0U); // sample size
+            _fileWriter.Write((short)0); // rectangle left
+            _fileWriter.Write((short)0); // rectangle top
             var right = (short)videoStream.Width;
             var bottom = (short)videoStream.Height;
-            fileWriter.Write(right); // rectangle right
-            fileWriter.Write(bottom); // rectangle bottom
+            _fileWriter.Write(right); // rectangle right
+            _fileWriter.Write(bottom); // rectangle bottom
         }
 
         void IAviStreamWriteHandler.WriteStreamHeader(AviAudioStream audioStream)
@@ -416,140 +418,140 @@ namespace Screna.Avi
             var wf = audioStream.WaveFormat;
 
             // See AVISTREAMHEADER structure
-            fileWriter.Write((uint)audioStream.StreamType);
-            fileWriter.Write(0U); // no codec
-            fileWriter.Write(0U); // StreamHeaderFlags
-            fileWriter.Write((ushort)0); // priority
-            fileWriter.Write((ushort)0); // language
-            fileWriter.Write(0U); // initial frames
-            fileWriter.Write((uint)wf.BlockAlign); // scale (sample rate denominator)
-            fileWriter.Write((uint)wf.AverageBytesPerSecond); // rate (sample rate numerator)
-            fileWriter.Write(0U); // start
-            fileWriter.Write((uint)streamsInfo[audioStream.Index].TotalDataSize); // length
-            fileWriter.Write((uint)(wf.AverageBytesPerSecond / 2)); // suggested buffer size (half-second)
-            fileWriter.Write(-1); // quality
-            fileWriter.Write(wf.BlockAlign); // sample size
-            fileWriter.SkipBytes(sizeof(short) * 4);
+            _fileWriter.Write((uint)audioStream.StreamType);
+            _fileWriter.Write(0U); // no codec
+            _fileWriter.Write(0U); // StreamHeaderFlags
+            _fileWriter.Write((ushort)0); // priority
+            _fileWriter.Write((ushort)0); // language
+            _fileWriter.Write(0U); // initial frames
+            _fileWriter.Write((uint)wf.BlockAlign); // scale (sample rate denominator)
+            _fileWriter.Write((uint)wf.AverageBytesPerSecond); // rate (sample rate numerator)
+            _fileWriter.Write(0U); // start
+            _fileWriter.Write((uint)_streamsInfo[audioStream.Index].TotalDataSize); // length
+            _fileWriter.Write((uint)(wf.AverageBytesPerSecond / 2)); // suggested buffer size (half-second)
+            _fileWriter.Write(-1); // quality
+            _fileWriter.Write(wf.BlockAlign); // sample size
+            _fileWriter.SkipBytes(sizeof(short) * 4);
         }
 
         void IAviStreamWriteHandler.WriteStreamFormat(AviVideoStream videoStream)
         {
             // See BITMAPINFOHEADER structure
-            fileWriter.Write(40U); // size of structure
-            fileWriter.Write(videoStream.Width);
-            fileWriter.Write(videoStream.Height);
-            fileWriter.Write((short)1); // planes
-            fileWriter.Write((ushort)videoStream.BitsPerPixel); // bits per pixel
-            fileWriter.Write((uint)videoStream.Codec); // compression (codec FOURCC)
-            var sizeInBytes = videoStream.Width * videoStream.Height * (((int)videoStream.BitsPerPixel) / 8);
-            fileWriter.Write((uint)sizeInBytes); // image size in bytes
-            fileWriter.Write(0); // X pixels per meter
-            fileWriter.Write(0); // Y pixels per meter
+            _fileWriter.Write(40U); // size of structure
+            _fileWriter.Write(videoStream.Width);
+            _fileWriter.Write(videoStream.Height);
+            _fileWriter.Write((short)1); // planes
+            _fileWriter.Write((ushort)videoStream.BitsPerPixel); // bits per pixel
+            _fileWriter.Write((uint)videoStream.Codec); // compression (codec FOURCC)
+            var sizeInBytes = videoStream.Width * videoStream.Height * ((int)videoStream.BitsPerPixel / 8);
+            _fileWriter.Write((uint)sizeInBytes); // image size in bytes
+            _fileWriter.Write(0); // X pixels per meter
+            _fileWriter.Write(0); // Y pixels per meter
 
             // Writing grayscale palette for 8-bit uncompressed stream
             // Otherwise, no palette
             if (videoStream.BitsPerPixel == BitsPerPixel.Bpp8 && videoStream.Codec == AviCodec.Uncompressed.FourCC)
             {
-                fileWriter.Write(256U); // palette colors used
-                fileWriter.Write(0U); // palette colors important
+                _fileWriter.Write(256U); // palette colors used
+                _fileWriter.Write(0U); // palette colors important
                 for (var i = 0; i < 256; i++)
                 {
-                    fileWriter.Write((byte)i);
-                    fileWriter.Write((byte)i);
-                    fileWriter.Write((byte)i);
-                    fileWriter.Write((byte)0);
+                    _fileWriter.Write((byte)i);
+                    _fileWriter.Write((byte)i);
+                    _fileWriter.Write((byte)i);
+                    _fileWriter.Write((byte)0);
                 }
             }
             else
             {
-                fileWriter.Write(0U); // palette colors used
-                fileWriter.Write(0U); // palette colors important
+                _fileWriter.Write(0U); // palette colors used
+                _fileWriter.Write(0U); // palette colors important
             }
         }
 
         void IAviStreamWriteHandler.WriteStreamFormat(AviAudioStream audioStream)
         {
-            audioStream.WaveFormat.Serialize(fileWriter);
+            audioStream.WaveFormat.Serialize(_fileWriter);
         }
         #endregion
 
         #region Header
         void WriteHeader()
         {
-            header = fileWriter.OpenList(RIFFListFourCCs.Header);
+            _header = _fileWriter.OpenList(RIFFListFourCCs.Header);
             WriteFileHeader();
-            foreach (var stream in streams) WriteStreamList(stream);
+            foreach (var stream in _streams) WriteStreamList(stream);
             WriteOdmlHeader();
             WriteJunkInsteadOfMissingSuperIndexEntries();
-            fileWriter.CloseItem(header);
+            _fileWriter.CloseItem(_header);
         }
 
         void WriteJunkInsteadOfMissingSuperIndexEntries()
         {
-            var missingEntriesCount = streamsInfo.Sum(si => MAX_SUPER_INDEX_ENTRIES - si.SuperIndex.Count);
+            var missingEntriesCount = _streamsInfo.Sum(si => MAX_SUPER_INDEX_ENTRIES - si.SuperIndex.Count);
             if (missingEntriesCount > 0)
             {
                 var junkDataSize = missingEntriesCount * sizeof(uint) * 4 - RiffItem.ITEM_HEADER_SIZE;
-                var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.Junk, junkDataSize);
-                fileWriter.SkipBytes(junkDataSize);
-                fileWriter.CloseItem(chunk);
+                var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.Junk, junkDataSize);
+                _fileWriter.SkipBytes(junkDataSize);
+                _fileWriter.CloseItem(chunk);
             }
         }
 
         void WriteFileHeader()
         {
             // See AVIMAINHEADER structure
-            var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.AviHeader);
-            fileWriter.Write((uint)decimal.Round(1000000m / FramesPerSecond)); // microseconds per frame
+            var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.AviHeader);
+            _fileWriter.Write((uint)decimal.Round(1000000m / FramesPerSecond)); // microseconds per frame
             // TODO: More correct computation of byterate
-            fileWriter.Write((uint)decimal.Truncate(FramesPerSecond * streamsInfo.Sum(s => s.MaxChunkDataSize))); // max bytes per second
-            fileWriter.Write(0U); // padding granularity
+            _fileWriter.Write((uint)decimal.Truncate(FramesPerSecond * _streamsInfo.Sum(s => s.MaxChunkDataSize))); // max bytes per second
+            _fileWriter.Write(0U); // padding granularity
             var flags = MainHeaderFlags.IsInterleaved | MainHeaderFlags.TrustChunkType;
-            if (emitIndex1) flags |= MainHeaderFlags.HasIndex;
-            fileWriter.Write((uint)flags); // MainHeaderFlags
-            fileWriter.Write(riffAviFrameCount); // total frames (in the first RIFF list containing this header)
-            fileWriter.Write(0U); // initial frames
-            fileWriter.Write((uint)Streams.Count); // stream count
-            fileWriter.Write(0U); // suggested buffer size
-            var firstVideoStream = streams.OfType<IAviVideoStream>().First();
-            fileWriter.Write(firstVideoStream.Width); // video width
-            fileWriter.Write(firstVideoStream.Height); // video height
-            fileWriter.SkipBytes(4 * sizeof(uint)); // reserved
-            fileWriter.CloseItem(chunk);
+            if (_emitIndex1) flags |= MainHeaderFlags.HasIndex;
+            _fileWriter.Write((uint)flags); // MainHeaderFlags
+            _fileWriter.Write(_riffAviFrameCount); // total frames (in the first RIFF list containing this header)
+            _fileWriter.Write(0U); // initial frames
+            _fileWriter.Write((uint)Streams.Count); // stream count
+            _fileWriter.Write(0U); // suggested buffer size
+            var firstVideoStream = _streams.OfType<IAviVideoStream>().First();
+            _fileWriter.Write(firstVideoStream.Width); // video width
+            _fileWriter.Write(firstVideoStream.Height); // video height
+            _fileWriter.SkipBytes(4 * sizeof(uint)); // reserved
+            _fileWriter.CloseItem(chunk);
         }
 
         void WriteOdmlHeader()
         {
-            var list = fileWriter.OpenList(RIFFListFourCCs.OpenDml);
-            var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.OpenDmlHeader);
-            fileWriter.Write(streams.OfType<IAviVideoStream>().Max(s => streamsInfo[s.Index].FrameCount)); // total frames in file
-            fileWriter.SkipBytes(61 * sizeof(uint)); // reserved
-            fileWriter.CloseItem(chunk);
-            fileWriter.CloseItem(list);
+            var list = _fileWriter.OpenList(RIFFListFourCCs.OpenDml);
+            var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.OpenDmlHeader);
+            _fileWriter.Write(_streams.OfType<IAviVideoStream>().Max(s => _streamsInfo[s.Index].FrameCount)); // total frames in file
+            _fileWriter.SkipBytes(61 * sizeof(uint)); // reserved
+            _fileWriter.CloseItem(chunk);
+            _fileWriter.CloseItem(list);
         }
 
         void WriteStreamList(IAviStreamInternal stream)
         {
-            var list = fileWriter.OpenList(RIFFListFourCCs.Stream);
+            var list = _fileWriter.OpenList(RIFFListFourCCs.Stream);
             WriteStreamHeader(stream);
             WriteStreamFormat(stream);
             WriteStreamName(stream);
             WriteStreamSuperIndex(stream);
-            fileWriter.CloseItem(list);
+            _fileWriter.CloseItem(list);
         }
 
         void WriteStreamHeader(IAviStreamInternal stream)
         {
-            var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.StreamHeader);
+            var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.StreamHeader);
             stream.WriteHeader();
-            fileWriter.CloseItem(chunk);
+            _fileWriter.CloseItem(chunk);
         }
 
         void WriteStreamFormat(IAviStreamInternal stream)
         {
-            var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.StreamFormat);
+            var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.StreamFormat);
             stream.WriteFormat();
-            fileWriter.CloseItem(chunk);
+            _fileWriter.CloseItem(chunk);
         }
 
         void WriteStreamName(IAviStream stream)
@@ -557,47 +559,47 @@ namespace Screna.Avi
             if (!string.IsNullOrEmpty(stream.Name))
             {
                 var bytes = Encoding.ASCII.GetBytes(stream.Name);
-                var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.StreamName);
-                fileWriter.Write(bytes);
-                fileWriter.Write((byte)0);
-                fileWriter.CloseItem(chunk);
+                var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.StreamName);
+                _fileWriter.Write(bytes);
+                _fileWriter.Write((byte)0);
+                _fileWriter.CloseItem(chunk);
             }
         }
 
         void WriteStreamSuperIndex(IAviStream stream)
         {
-            var superIndex = streamsInfo[stream.Index].SuperIndex;
+            var superIndex = _streamsInfo[stream.Index].SuperIndex;
 
             // See AVISUPERINDEX structure
-            var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.StreamIndex);
-            fileWriter.Write((ushort)4); // DWORDs per entry
-            fileWriter.Write((byte)0); // index sub-type
-            fileWriter.Write((byte)IndexType.Indexes); // index type
-            fileWriter.Write((uint)superIndex.Count); // entries count
-            fileWriter.Write((uint)((IAviStreamInternal)stream).ChunkId); // chunk ID of the stream
-            fileWriter.SkipBytes(3 * sizeof(uint)); // reserved
+            var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.StreamIndex);
+            _fileWriter.Write((ushort)4); // DWORDs per entry
+            _fileWriter.Write((byte)0); // index sub-type
+            _fileWriter.Write((byte)IndexType.Indexes); // index type
+            _fileWriter.Write((uint)superIndex.Count); // entries count
+            _fileWriter.Write((uint)((IAviStreamInternal)stream).ChunkId); // chunk ID of the stream
+            _fileWriter.SkipBytes(3 * sizeof(uint)); // reserved
 
             // entries
             foreach (var entry in superIndex)
             {
-                fileWriter.Write((ulong)entry.ChunkOffset); // offset of sub-index chunk
-                fileWriter.Write((uint)entry.ChunkSize); // size of sub-index chunk
-                fileWriter.Write((uint)entry.Duration); // duration of sub-index data (number of frames it refers to)
+                _fileWriter.Write((ulong)entry.ChunkOffset); // offset of sub-index chunk
+                _fileWriter.Write((uint)entry.ChunkSize); // size of sub-index chunk
+                _fileWriter.Write((uint)entry.Duration); // duration of sub-index data (number of frames it refers to)
             }
 
-            fileWriter.CloseItem(chunk);
+            _fileWriter.CloseItem(chunk);
         }
         #endregion
 
         #region Index
         void WriteIndex1()
         {
-            var chunk = fileWriter.OpenChunk(RIFFChunksFourCCs.Index1);
+            var chunk = _fileWriter.OpenChunk(RIFFChunksFourCCs.Index1);
 
-            var indices = streamsInfo.Select((si, i) => new { si.Index1, ChunkId = (uint)streams.ElementAt(i).ChunkId }).
+            var indices = _streamsInfo.Select((si, i) => new { si.Index1, ChunkId = (uint)_streams.ElementAt(i).ChunkId }).
                 Where(a => a.Index1.Count > 0)
                 .ToList();
-            while (index1Count > 0)
+            while (_index1Count > 0)
             {
                 var minOffset = indices[0].Index1[0].DataOffset;
                 var minIndex = 0;
@@ -612,19 +614,19 @@ namespace Screna.Avi
                 }
 
                 var index = indices[minIndex];
-                fileWriter.Write(index.ChunkId);
-                fileWriter.Write(index.Index1[0].IsKeyFrame ? 0x00000010U : 0);
-                fileWriter.Write(index.Index1[0].DataOffset);
-                fileWriter.Write(index.Index1[0].DataSize);
+                _fileWriter.Write(index.ChunkId);
+                _fileWriter.Write(index.Index1[0].IsKeyFrame ? 0x00000010U : 0);
+                _fileWriter.Write(index.Index1[0].DataOffset);
+                _fileWriter.Write(index.Index1[0].DataSize);
 
                 index.Index1.RemoveAt(0);
                 if (index.Index1.Count == 0)
                     indices.RemoveAt(minIndex);
 
-                index1Count--;
+                _index1Count--;
             }
 
-            fileWriter.CloseItem(chunk);
+            _fileWriter.CloseItem(chunk);
         }
 
         bool ShouldFlushStreamIndex(IList<StandardIndexEntry> index)
@@ -634,12 +636,12 @@ namespace Screna.Avi
                 return true;
 
             // Check relative offset
-            return index.Count > 0 && fileWriter.BaseStream.Position - index[0].DataOffset > uint.MaxValue;
+            return index.Count > 0 && _fileWriter.BaseStream.Position - index[0].DataOffset > uint.MaxValue;
         }
 
         void FlushStreamIndex(IAviStreamInternal stream)
         {
-            var si = streamsInfo[stream.Index];
+            var si = _streamsInfo[stream.Index];
             var index = si.StandardIndex;
             var entriesCount = index.Count;
             if (entriesCount == 0)
@@ -651,24 +653,24 @@ namespace Screna.Avi
             CreateNewRiffIfNeeded(indexSize);
 
             // See AVISTDINDEX structure
-            var chunk = fileWriter.OpenChunk(si.StandardIndexChunkId, indexSize);
-            fileWriter.Write((ushort)2); // DWORDs per entry
-            fileWriter.Write((byte)0); // index sub-type
-            fileWriter.Write((byte)IndexType.Chunks); // index type
-            fileWriter.Write((uint)entriesCount); // entries count
-            fileWriter.Write((uint)stream.ChunkId); // chunk ID of the stream
-            fileWriter.Write((ulong)baseOffset); // base offset for entries
-            fileWriter.SkipBytes(sizeof(uint)); // reserved
+            var chunk = _fileWriter.OpenChunk(si.StandardIndexChunkId, indexSize);
+            _fileWriter.Write((ushort)2); // DWORDs per entry
+            _fileWriter.Write((byte)0); // index sub-type
+            _fileWriter.Write((byte)IndexType.Chunks); // index type
+            _fileWriter.Write((uint)entriesCount); // entries count
+            _fileWriter.Write((uint)stream.ChunkId); // chunk ID of the stream
+            _fileWriter.Write((ulong)baseOffset); // base offset for entries
+            _fileWriter.SkipBytes(sizeof(uint)); // reserved
 
             foreach (var entry in index)
             {
-                fileWriter.Write((uint)(entry.DataOffset - baseOffset)); // chunk data offset
-                fileWriter.Write(entry.DataSize); // chunk data size
+                _fileWriter.Write((uint)(entry.DataOffset - baseOffset)); // chunk data offset
+                _fileWriter.Write(entry.DataSize); // chunk data size
             }
 
-            fileWriter.CloseItem(chunk);
+            _fileWriter.CloseItem(chunk);
 
-            var superIndex = streamsInfo[stream.Index].SuperIndex;
+            var superIndex = _streamsInfo[stream.Index].SuperIndex;
             var newEntry = new SuperIndexEntry
             {
                 ChunkOffset = chunk.ItemStart,

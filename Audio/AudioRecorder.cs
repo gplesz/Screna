@@ -5,46 +5,46 @@ namespace Screna.Audio
 {
     public class AudioRecorder : IRecorder
     {
-        IAudioFileWriter Writer;
-        IAudioProvider AudioProvider;
-        SynchronizationContext syncContext;
+        IAudioFileWriter _writer;
+        readonly IAudioProvider _audioProvider;
+        readonly SynchronizationContext _syncContext;
 
         public AudioRecorder(IAudioProvider provider, IAudioFileWriter writer)
         {
-            AudioProvider = provider;
-            Writer = writer;
+            _audioProvider = provider;
+            _writer = writer;
 
-            syncContext = SynchronizationContext.Current;
+            _syncContext = SynchronizationContext.Current;
 
-            AudioProvider.DataAvailable += (data, length) => Writer.Write(data, 0, length);
-            AudioProvider.RecordingStopped += e =>
+            _audioProvider.DataAvailable += (data, length) => _writer.Write(data, 0, length);
+            _audioProvider.RecordingStopped += e =>
             {
                 var handler = RecordingStopped;
 
                 if (handler == null)
                     return;
 
-                if (syncContext != null)
-                    syncContext.Post(s => handler(e), null);
+                if (_syncContext != null)
+                    _syncContext.Post(s => handler(e), null);
 
                 else handler(e);
             };
         }
 
-        public void Start(int Delay = 0) => AudioProvider.Start();
+        public void Start(int Delay = 0) => _audioProvider.Start();
 
         public void Stop()
         {
-            AudioProvider?.Dispose();
+            _audioProvider?.Dispose();
 
-            if (Writer != null)
-            {
-                Writer.Dispose();
-                Writer = null;
-            }
+            if (_writer == null)
+                return;
+
+            _writer.Dispose();
+            _writer = null;
         }
 
-        public void Pause() => AudioProvider.Stop();
+        public void Pause() => _audioProvider.Stop();
 
         public event Action<Exception> RecordingStopped;
     }

@@ -20,15 +20,15 @@ namespace Screna.Audio
         internal static IEnumerable<WasapiAudioDevice> EnumerateAudioEndPoints(DataFlow dataFlow)
         {
             IMMDeviceCollection collection;
-            const int DeviceState_Active = 0x00000001;
-            Marshal.ThrowExceptionForHR(realEnumerator.EnumAudioEndpoints(dataFlow, DeviceState_Active, out collection));
+            const int deviceStateActive = 0x00000001;
+            Marshal.ThrowExceptionForHR(realEnumerator.EnumAudioEndpoints(dataFlow, deviceStateActive, out collection));
 
-            int Count;
-            Marshal.ThrowExceptionForHR(collection.GetCount(out Count));
+            int count;
+            Marshal.ThrowExceptionForHR(collection.GetCount(out count));
 
-            IMMDevice dev;
-            for (var index = 0; index < Count; index++)
+            for (var index = 0; index < count; index++)
             {
+                IMMDevice dev;
                 collection.Item(index, out dev);
                 yield return new WasapiAudioDevice(dev);
             }
@@ -60,7 +60,7 @@ namespace Screna.Audio
         }
         #endregion
 
-        readonly IMMDevice deviceInterface;
+        readonly IMMDevice _deviceInterface;
 
         static Guid IID_IAudioClient = new Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2");
 
@@ -71,7 +71,7 @@ namespace Screna.Audio
             {
                 object result;
                 var ClsCtx_All = 0x1 | 0x2 | 0x4 | 0x10;
-                Marshal.ThrowExceptionForHR(deviceInterface.Activate(ref IID_IAudioClient, ClsCtx_All, IntPtr.Zero, out result));
+                Marshal.ThrowExceptionForHR(_deviceInterface.Activate(ref IID_IAudioClient, ClsCtx_All, IntPtr.Zero, out result));
                 return new AudioClient(result as IAudioClient);
             }
         }
@@ -83,7 +83,7 @@ namespace Screna.Audio
             get
             {
                 string result;
-                Marshal.ThrowExceptionForHR(deviceInterface.GetId(out result));
+                Marshal.ThrowExceptionForHR(_deviceInterface.GetId(out result));
                 return result;
             }
         }
@@ -97,12 +97,12 @@ namespace Screna.Audio
 
         internal WasapiAudioDevice(IMMDevice realDevice)
         {
-            deviceInterface = realDevice;
+            _deviceInterface = realDevice;
 
             IPropertyStore propstore;
             var StorageAccessMode_Read = 0;
 
-            Marshal.ThrowExceptionForHR(deviceInterface.OpenPropertyStore(StorageAccessMode_Read, out propstore));
+            Marshal.ThrowExceptionForHR(_deviceInterface.OpenPropertyStore(StorageAccessMode_Read, out propstore));
 
             Name = new PropertyStore(propstore)[PKEY_Device_FriendlyName];
         }

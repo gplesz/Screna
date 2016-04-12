@@ -2,7 +2,7 @@
 
 namespace Screna.Avi
 {
-    abstract class AviStreamBase : IAviStream, IAviStreamInternal
+    abstract class AviStreamBase : IAviStreamInternal
     {
         bool isFrozen;
         string name;
@@ -10,7 +10,7 @@ namespace Screna.Avi
 
         protected AviStreamBase(int index)
         {
-            this.Index = index;
+            Index = index;
         }
 
         public int Index { get; }
@@ -31,7 +31,8 @@ namespace Screna.Avi
         {
             get
             {
-                if (!isFrozen) throw new InvalidOperationException("Chunk ID is not defined until the stream is frozen.");
+                if (!isFrozen)
+                    throw new InvalidOperationException("Chunk ID is not defined until the stream is frozen.");
 
                 return chunkId;
             }
@@ -49,12 +50,12 @@ namespace Screna.Avi
         /// </remarks>
         public virtual void PrepareForWriting()
         {
-            if (!isFrozen)
-            {
-                isFrozen = true;
+            if (isFrozen)
+                return;
 
-                chunkId = GenerateChunkId();
-            }
+            isFrozen = true;
+
+            chunkId = GenerateChunkId();
         }
 
         /// <summary>
