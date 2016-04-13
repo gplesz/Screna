@@ -1,8 +1,8 @@
 ﻿namespace Screna.Native
 {
-    public enum GetWindowEnum { Owner = 4 }
+    enum GetWindowEnum { Owner = 4 }
 
-    public enum SetWindowPositionFlags
+    enum SetWindowPositionFlags
     {
         NoMove = 0x2,
         NoSize = 1,
@@ -11,7 +11,7 @@
         NoActivate = 0x0010
     }
 
-    public enum WindowStyles : long
+    enum WindowStyles : long
     {
         WS_CHILD = 0x40000000,
         WS_EX_TOOLWINDOW = 0x00000080,
@@ -19,13 +19,13 @@
         WS_SIZEBOX = 0x00040000L
     }
 
-    public enum GetWindowLongValue
+    enum GetWindowLongValue
     {
         GWL_STYLE = -16,
         GWL_EXSTYLE = -20
     }
 
-    public enum WindowsMessage
+    enum WindowsMessage
     {
         WM_LBUTTONDOWN = 0x201,
         WM_RBUTTONDOWN = 0x204,

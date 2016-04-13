@@ -4,6 +4,9 @@ using System.Drawing.Drawing2D;
 
 namespace Screna
 {
+    /// <summary>
+    /// Wraps up another IImageProvider to provide images resied to required dimensions.
+    /// </summary>
     public class ResizedImageProvider : IImageProvider
     {
         readonly float _resizeWidth, _resizeHeight;
@@ -11,6 +14,13 @@ namespace Screna
         readonly IImageProvider _imageSource;
         readonly Color _backgroundColor;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="ResizedImageProvider"/>.
+        /// </summary>
+        /// <param name="ImageSource">The Source <see cref="IImageProvider"/>.</param>
+        /// <param name="TargetWidth">Target Width.</param>
+        /// <param name="TargetHeight">Target Height.</param>
+        /// <param name="BackgroundColor">Background Color to fill any left space.</param>
         public ResizedImageProvider(IImageProvider ImageSource, int TargetWidth, int TargetHeight, Color BackgroundColor)
         {
             _imageSource = ImageSource;
@@ -28,6 +38,9 @@ namespace Screna
             _resizeHeight = originalHeight * ratio;
         }
 
+        /// <summary>
+        /// Capture an image.
+        /// </summary>
         public Bitmap Capture()
         {
             var bmp = _imageSource.Capture();
@@ -49,10 +62,19 @@ namespace Screna
             return resizedBmp;
         }
 
+        /// <summary>
+        /// Height of Captured image.
+        /// </summary>
         public int Height { get; }
 
+        /// <summary>
+        /// Width of Captured image.
+        /// </summary>
         public int Width { get; }
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public void Dispose() { }
     }
 }

@@ -2,63 +2,82 @@
 
 namespace Screna.Audio
 {
+    /// <summary>
+    /// Writes an audio file encoded using an <see cref="IAudioEncoder"/>.
+    /// </summary>
     public class EncodedAudioFileWriter : IAudioFileWriter
     {
-        readonly object SyncLock = new object();
-        BinaryWriter Writer;
+        readonly object _syncLock = new object();
+        readonly BinaryWriter _writer;
 
-        IAudioEncoder Encoder;
-        byte[] EncodedBuffer;
+        readonly IAudioEncoder _encoder;
+        byte[] _encodedBuffer;
 
+        /// <summary>
+        /// Creates a new <see cref="EncodedAudioFileWriter"/>.
+        /// </summary>
+        /// <param name="OutStream">The <see cref="Stream"/> to write to.</param>
+        /// <param name="Encoder">The <see cref="IAudioEncoder"/> to use to encode the audio.</param>
         public EncodedAudioFileWriter(Stream OutStream, IAudioEncoder Encoder)
         {
-            Writer = new BinaryWriter(OutStream);
+            _writer = new BinaryWriter(OutStream);
 
-            this.Encoder = Encoder;
+            _encoder = Encoder;
 
-            Encoder.WaveFormat.Serialize(Writer);
+            Encoder.WaveFormat.Serialize(_writer);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="EncodedAudioFileWriter"/>.
+        /// </summary>
+        /// <param name="FilePath">The path to file to write to.</param>
+        /// <param name="Encoder">The <see cref="IAudioEncoder"/> to use to encode the audio.</param>
         public EncodedAudioFileWriter(string FilePath, IAudioEncoder Encoder)
             : this(new FileStream(FilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), Encoder) { }
         
         /// <summary>
         /// Encodes and writes a block of audio data.
         /// </summary>
-        public void Write(byte[] Data, int Offset, int Length)
+        public void Write(byte[] Data, int Offset, int Count)
         {
             // Prevent accessing encoded buffer by multiple threads simultaneously
-            lock (SyncLock)
+            lock (_syncLock)
             {
-                Encoder.EnsureBufferIsSufficient(ref EncodedBuffer, Length);
+                _encoder.EnsureBufferIsSufficient(ref _encodedBuffer, Count);
 
-                var EncodedLength = Encoder.Encode(Data, Offset, Length, EncodedBuffer, 0);
+                var encodedLength = _encoder.Encode(Data, Offset, Count, _encodedBuffer, 0);
 
-                if (EncodedLength > 0)
-                    Writer.Write(EncodedBuffer, 0, EncodedLength);
+                if (encodedLength > 0)
+                    _writer.Write(_encodedBuffer, 0, encodedLength);
             }
         }
 
+        /// <summary>
+        /// Writes all buffered data to file.
+        /// </summary>
         public void Flush()
         {
-            lock (SyncLock)
+            lock (_syncLock)
             {
                 // Flush the encoder
-                Encoder.EnsureBufferIsSufficient(ref EncodedBuffer, 0);
+                _encoder.EnsureBufferIsSufficient(ref _encodedBuffer, 0);
 
-                var EncodedLength = Encoder.Flush(EncodedBuffer, 0);
+                var encodedLength = _encoder.Flush(_encodedBuffer, 0);
 
-                if (EncodedLength > 0)
-                    Writer.Write(EncodedBuffer, 0, EncodedLength);
+                if (encodedLength > 0)
+                    _writer.Write(_encodedBuffer, 0, encodedLength);
             }
         }
 
+        /// <summary>
+        /// Releases all resources used by this object.
+        /// </summary>
         public void Dispose()
         {
             Flush();
 
-            Writer.Dispose();
-            Encoder.Dispose();
+            _writer.Dispose();
+            _encoder.Dispose();
         }
     }
 }

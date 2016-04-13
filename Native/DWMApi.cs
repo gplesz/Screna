@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace Screna.Native
 {
-    public enum DwmWindowAttribute { ExtendedFrameBounds }
+    enum DwmWindowAttribute { ExtendedFrameBounds }
 
-    public static class DWMApi
+    static class DWMApi
     {
         [DllImport("dwmapi.dll")]
         public static extern int DwmGetWindowAttribute(IntPtr hWnd, DwmWindowAttribute dWAttribute, ref RECT pvAttribute, int cbAttribute);

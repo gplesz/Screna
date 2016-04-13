@@ -6,14 +6,30 @@ using System.Text;
 
 namespace Screna
 {
+    /// <summary>
+    /// A Class for Enumerating Windows.
+    /// </summary>
     public class WindowHandler
     {
+        /// <summary>
+        /// Creates a new instance of <see cref="WindowHandler"/>.
+        /// </summary>
+        /// <param name="hWnd">The Window Handle.</param>
         public WindowHandler(IntPtr hWnd) { Handle = hWnd; }
 
+        /// <summary>
+        /// Gets whether the Window is Visible.
+        /// </summary>
         public bool IsVisible => User32.IsWindowVisible(Handle);
 
+        /// <summary>
+        /// Gets the Window Handle.
+        /// </summary>
         public IntPtr Handle { get; }
 
+        /// <summary>
+        /// Gets the Window Title.
+        /// </summary>
         public string Title
         {
             get
@@ -24,23 +40,32 @@ namespace Screna
             }
         }
 
+        /// <summary>
+        /// Enumerates all Windows.
+        /// </summary>
         public static IEnumerable<WindowHandler> Enumerate()
         {
             var list = new List<WindowHandler>();
 
             User32.EnumWindows((hWnd, lParam) =>
-                {
-                    list.Add(new WindowHandler(hWnd));
+            {
+                var wh = new WindowHandler(hWnd);
 
-                    return true;
-                }, IntPtr.Zero);
+                list.Add(wh);
+
+                return true;
+            }, IntPtr.Zero);
 
             return list;
         }
 
+        /// <summary>
+        /// Enumerates all visible windows with a Title.
+        /// </summary>
         public static IEnumerable<WindowHandler> EnumerateVisible()
         {
-            foreach (var hWnd in from win in Enumerate() let hWnd = win.Handle where win.IsVisible select hWnd)
+            foreach (var hWnd in Enumerate().Where(W => W.IsVisible && !string.IsNullOrWhiteSpace(W.Title))
+                                            .Select(W => W.Handle))
             {
                 if (!User32.GetWindowLong(hWnd, GetWindowLongValue.GWL_EXSTYLE).HasFlag(WindowStyles.WS_EX_APPWINDOW))
                 {

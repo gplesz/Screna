@@ -55,15 +55,15 @@ namespace Screna.Avi
         /// </summary>
         public void Dispose()
         {
-            if (thread.IsAlive)
-            {
-                var encoderDisposable = encoder as IDisposable;
-                if (encoderDisposable != null)
-                    dispatcher.Invoke(encoderDisposable.Dispose);
+            if (!thread.IsAlive)
+                return;
 
-                dispatcher.InvokeShutdown();
-                thread.Join();
-            }
+            var encoderDisposable = encoder as IDisposable;
+            if (encoderDisposable != null)
+                dispatcher.Invoke(encoderDisposable.Dispose);
+
+            dispatcher.InvokeShutdown();
+            thread.Join();
         }
 
         /// <summary>Codec ID.</summary>

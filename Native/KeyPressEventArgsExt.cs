@@ -8,7 +8,7 @@ namespace Screna.Native
     /// <summary>
     ///     Provides extended data for the <see cref='KeyListener.KeyPress' /> event.
     /// </summary>
-    public class KeyPressEventArgsExt : KeyPressEventArgs
+    class KeyPressEventArgsExt : KeyPressEventArgs
     {
         internal KeyPressEventArgsExt(char keyChar, int timestamp)
             : base(keyChar)

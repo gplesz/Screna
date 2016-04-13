@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace Screna.Native
 {
-    public class KeyListener : BaseListener
+    class KeyListener : BaseListener
     {
         public KeyListener() : base(HookHelper.HookGlobalKeyboard) { }
 

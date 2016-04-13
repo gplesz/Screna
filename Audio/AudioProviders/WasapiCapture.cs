@@ -35,15 +35,15 @@ namespace Screna.Audio
     {
         const long ReftimesPerSec = 10000000,
             ReftimesPerMillisec = 10000;
-        volatile CaptureState captureState;
-        byte[] recordBuffer;
-        Thread captureThread;
-        AudioClient audioClient;
-        int bytesPerFrame;
-        WaveFormat waveFormat;
-        bool initialized;
-        readonly SynchronizationContext syncContext;
-        readonly int audioBufferMillisecondsLength;
+        volatile CaptureState _captureState;
+        byte[] _recordBuffer;
+        Thread _captureThread;
+        AudioClient _audioClient;
+        int _bytesPerFrame;
+        WaveFormat _waveFormat;
+        bool _initialized;
+        readonly SynchronizationContext _syncContext;
+        readonly int _audioBufferMillisecondsLength;
 
         /// <summary>
         /// Indicates recorded data is available 
@@ -55,27 +55,29 @@ namespace Screna.Audio
         /// </summary>
         public event Action<Exception> RecordingStopped;
 
+        /// <summary>
+        /// Creates a new instances of <see cref="WasapiCapture"/> class using <see cref="DefaultDevice"/>.
+        /// </summary>
         public WasapiCapture() : this(DefaultDevice) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WasapiCapture" /> class.
         /// </summary>
-        /// <param name="captureDevice">The capture device.</param>
-        /// <param name="useEventSync">true if sync is done with event. false use sleep.</param>
-        /// <param name="audioBufferMillisecondsLength">Length of the audio buffer in milliseconds. A lower value means lower latency but increased CPU usage.</param>
-        public WasapiCapture(WasapiAudioDevice captureDevice, int audioBufferMillisecondsLength = 100)
+        /// <param name="CaptureDevice">The capture device.</param>
+        /// <param name="AudioBufferMillisecondsLength">Length of the audio buffer in milliseconds. A lower value means lower latency but increased CPU usage.</param>
+        public WasapiCapture(WasapiAudioDevice CaptureDevice, int AudioBufferMillisecondsLength = 100)
         {
-            syncContext = SynchronizationContext.Current;
-            audioClient = captureDevice.AudioClient;
-            this.audioBufferMillisecondsLength = audioBufferMillisecondsLength;
+            _syncContext = SynchronizationContext.Current;
+            _audioClient = CaptureDevice.AudioClient;
+            _audioBufferMillisecondsLength = AudioBufferMillisecondsLength;
 
-            waveFormat = audioClient.MixFormat;
+            _waveFormat = _audioClient.MixFormat;
         }
 
         /// <summary>
         /// Current Capturing State
         /// </summary>
-        public CaptureState CaptureState => captureState;
+        public CaptureState CaptureState => _captureState;
 
         /// <summary>
         /// Capturing wave format
@@ -86,9 +88,9 @@ namespace Screna.Audio
             {
                 // for convenience, return a WAVEFORMATEX, instead of the real
                 // WAVEFORMATEXTENSIBLE being used
-                return waveFormat;
+                return _waveFormat;
             }
-            set { waveFormat = value; }
+            set { _waveFormat = value; }
         }
 
         /// <summary>
@@ -97,32 +99,35 @@ namespace Screna.Audio
         /// <returns>The default audio capture device</returns>
         public static WasapiAudioDevice DefaultDevice => WasapiAudioDevice.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Console);
 
+        /// <summary>
+        /// Enumerates all Wasapi Capture Devices.
+        /// </summary>
         public static IEnumerable<WasapiAudioDevice> EnumerateDevices() => WasapiAudioDevice.EnumerateAudioEndPoints(DataFlow.Capture);
 
         void Init()
         {
-            if (initialized)
+            if (_initialized)
                 return;
 
-            var requestedDuration = ReftimesPerMillisec * audioBufferMillisecondsLength;
+            var requestedDuration = ReftimesPerMillisec * _audioBufferMillisecondsLength;
 
-            if (!audioClient.IsFormatSupported(AudioClientShareMode.Shared, waveFormat))
+            if (!_audioClient.IsFormatSupported(AudioClientShareMode.Shared, _waveFormat))
                 throw new ArgumentException("Unsupported Wave Format");
 
             var streamFlags = AudioClientStreamFlags;
 
-            audioClient.Initialize(AudioClientShareMode.Shared,
+            _audioClient.Initialize(AudioClientShareMode.Shared,
                 streamFlags,
                 requestedDuration,
                 0,
-                waveFormat,
+                _waveFormat,
                 Guid.Empty);
             
-            var bufferFrameCount = audioClient.BufferSize;
-            bytesPerFrame = waveFormat.Channels * waveFormat.BitsPerSample / 8;
-            recordBuffer = new byte[bufferFrameCount * bytesPerFrame];
+            var bufferFrameCount = _audioClient.BufferSize;
+            _bytesPerFrame = _waveFormat.Channels * _waveFormat.BitsPerSample / 8;
+            _recordBuffer = new byte[bufferFrameCount * _bytesPerFrame];
 
-            initialized = true;
+            _initialized = true;
         }
 
         /// <summary>
@@ -135,61 +140,61 @@ namespace Screna.Audio
         /// </summary>
         public virtual void Start()
         {
-            if (captureState != CaptureState.Stopped)
+            if (_captureState != CaptureState.Stopped)
                 throw new InvalidOperationException("Previous recording still in progress");
 
-            captureState = CaptureState.Starting;
+            _captureState = CaptureState.Starting;
             Init();
-            ThreadStart start = () => CaptureThread(audioClient);
-            captureThread = new Thread(start);
-            captureThread.Start();
+            ThreadStart start = () => CaptureThread(_audioClient);
+            _captureThread = new Thread(start);
+            _captureThread.Start();
         }
 
         /// <summary>
-        /// Stop Capturing (requests a stop, wait for RecordingStopped event to know it has finished)
+        /// Stop Capturing (requests a stop, wait for <see cref="RecordingStopped"/> event to know it has finished)
         /// </summary>
         public virtual void Stop()
         {
-            if (captureState != CaptureState.Stopped)
-                captureState = CaptureState.Stopping;
+            if (_captureState != CaptureState.Stopped)
+                _captureState = CaptureState.Stopping;
         }
 
-        void CaptureThread(AudioClient client)
+        void CaptureThread(AudioClient Client)
         {
             Exception exception = null;
-            try { DoRecording(client); }
+            try { DoRecording(Client); }
             catch (Exception e) { exception = e; }
             finally
             {
-                client.Stop();
+                Client.Stop();
                 // don't dispose - the AudioClient only gets disposed when WasapiCapture is disposed
             }
 
-            captureThread = null;
-            captureState = CaptureState.Stopped;
+            _captureThread = null;
+            _captureState = CaptureState.Stopped;
             RaiseRecordingStopped(exception);
         }
 
-        void DoRecording(AudioClient client)
+        void DoRecording(AudioClient Client)
         {
-            var bufferFrameCount = client.BufferSize;
+            var bufferFrameCount = Client.BufferSize;
 
             // Calculate the actual duration of the allocated buffer.
             var actualDuration = (long)((double)ReftimesPerSec *
-                             bufferFrameCount / waveFormat.SampleRate);
+                             bufferFrameCount / _waveFormat.SampleRate);
 
             var sleepMilliseconds = (int)(actualDuration / ReftimesPerMillisec / 2);
 
-            var capture = client.AudioCaptureClient;
+            var capture = Client.AudioCaptureClient;
 
-            client.Start();
-            captureState = CaptureState.Capturing;
+            Client.Start();
+            _captureState = CaptureState.Capturing;
 
-            while (captureState == CaptureState.Capturing)
+            while (_captureState == CaptureState.Capturing)
             {
                 Thread.Sleep(sleepMilliseconds);
 
-                if (captureState != CaptureState.Capturing)
+                if (_captureState != CaptureState.Capturing)
                     break;
 
                 ReadNextPacket(capture);
@@ -203,29 +208,29 @@ namespace Screna.Audio
             if (handler == null)
                 return;
 
-            if (syncContext == null)
+            if (_syncContext == null)
                 handler(e);
 
-            else syncContext.Post(state => handler(e), null);
+            else _syncContext.Post(State => handler(e), null);
         }
 
-        void ReadNextPacket(AudioCaptureClient capture)
+        void ReadNextPacket(AudioCaptureClient Capture)
         {
-            int packetSize = capture.GetNextPacketSize(),
+            int packetSize = Capture.GetNextPacketSize(),
                 recordBufferOffset = 0;
 
             while (packetSize != 0)
             {
                 int framesAvailable, flags;
-                var buffer = capture.GetBuffer(out framesAvailable, out flags);
+                var buffer = Capture.GetBuffer(out framesAvailable, out flags);
 
-                var bytesAvailable = framesAvailable * bytesPerFrame;
+                var bytesAvailable = framesAvailable * _bytesPerFrame;
 
                 // apparently it is sometimes possible to read more frames than we were expecting?
-                var spaceRemaining = Math.Max(0, recordBuffer.Length - recordBufferOffset);
+                var spaceRemaining = Math.Max(0, _recordBuffer.Length - recordBufferOffset);
                 if (spaceRemaining < bytesAvailable && recordBufferOffset > 0)
                 {
-                    DataAvailable?.Invoke(recordBuffer, recordBufferOffset);
+                    DataAvailable?.Invoke(_recordBuffer, recordBufferOffset);
                     recordBufferOffset = 0;
                 }
 
@@ -233,34 +238,40 @@ namespace Screna.Audio
 
                 // if not silence...
                 if ((flags & audioClientBufferFlagsSilent) != audioClientBufferFlagsSilent)
-                    Marshal.Copy(buffer, recordBuffer, recordBufferOffset, bytesAvailable);
-                else Array.Clear(recordBuffer, recordBufferOffset, bytesAvailable);
+                    Marshal.Copy(buffer, _recordBuffer, recordBufferOffset, bytesAvailable);
+                else Array.Clear(_recordBuffer, recordBufferOffset, bytesAvailable);
 
                 recordBufferOffset += bytesAvailable;
-                capture.ReleaseBuffer(framesAvailable);
-                packetSize = capture.GetNextPacketSize();
+                Capture.ReleaseBuffer(framesAvailable);
+                packetSize = Capture.GetNextPacketSize();
             }
 
-            DataAvailable?.Invoke(recordBuffer, recordBufferOffset);
+            DataAvailable?.Invoke(_recordBuffer, recordBufferOffset);
         }
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public virtual void Dispose()
         {
             Stop();
 
-            if (captureThread != null)
+            if (_captureThread != null)
             {
-                captureThread.Join();
-                captureThread = null;
+                _captureThread.Join();
+                _captureThread = null;
             }
 
-            if (audioClient == null)
+            if (_audioClient == null)
                 return;
 
-            audioClient.Dispose();
-            audioClient = null;
+            _audioClient.Dispose();
+            _audioClient = null;
         }
 
+        /// <summary>
+        /// <see cref="WasapiCapture"/> is not synchronizable.
+        /// </summary>
         public bool IsSynchronizable => false;
     }
 }

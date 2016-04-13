@@ -9,7 +9,7 @@ using Microsoft.Win32.SafeHandles;
 namespace Screna.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct IconInfo
+    struct IconInfo
     {
         public bool fIcon;
         public int xHotspot;
@@ -19,7 +19,7 @@ namespace Screna.Native
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CursorInfo
+    struct CursorInfo
     {
         public int cbSize;
         public int flags;
@@ -28,7 +28,7 @@ namespace Screna.Native
     }
 
     [Serializable, StructLayout(LayoutKind.Sequential)]
-    public struct RECT
+    struct RECT
     {
         public int Left;
         public int Top;
@@ -47,7 +47,7 @@ namespace Screna.Native
         }
     }
 
-    public struct CallbackData
+    struct CallbackData
     {
         public CallbackData(IntPtr wParam, IntPtr lParam)
         {
@@ -110,7 +110,7 @@ namespace Screna.Native
         }
     }
 
-    public class HookProcedureHandle : SafeHandleZeroOrMinusOneIsInvalid
+    class HookProcedureHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         static bool _closing;
 
@@ -126,7 +126,7 @@ namespace Screna.Native
         }
     }
 
-    public class HookResult : IDisposable
+    class HookResult : IDisposable
     {
         public HookResult(HookProcedureHandle handle, HookProcedure procedure)
         {

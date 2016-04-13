@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Screna
 {
     /// <summary>
-    /// Uses default .net GIF encoding and adds animation headers.
+    /// Creates a GIF using net GIF encoding and additional animation headers.
     /// </summary>
     public class GifWriter : IVideoFileWriter
     {
@@ -46,12 +46,18 @@ namespace Screna
             : this(new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read), DefaultFrameDelay, Repeat) { }
 
         #region Properties
+        /// <summary>
+        /// Gets or Sets the Default Width of a Frame. Used when unspecified.
+        /// </summary>
         public int DefaultWidth { get; set; }
 
+        /// <summary>
+        /// Gets or Sets the Default Height of a Frame. Used when unspecified.
+        /// </summary>
         public int DefaultHeight { get; set; }
 
         /// <summary>
-        /// Default Delay in Milliseconds
+        /// Gets or Sets the Default Delay in Milliseconds. Used when unspecified.
         /// </summary>
         public int DefaultFrameDelay { get; set; }
 
@@ -62,16 +68,21 @@ namespace Screna
         public int Repeat { get; }
         #endregion
 
+        /// <summary>
+        /// Frame Rate.
+        /// </summary>
         public int FrameRate => 1000 / DefaultFrameDelay;
 
+        /// <summary>
+        /// <see cref="GifWriter"/> does not Support Audio.
+        /// </summary>
         public void WriteAudio(byte[] Buffer, int Count) { }
 
         /// <summary>
         /// Adds a frame to this animation.
         /// </summary>
         /// <param name="Image">The image to add</param>
-        /// <param name="XOffset">The positioning x offset this image should be displayed at.</param>
-        /// <param name="YOffset">The positioning y offset this image should be displayed at.</param>
+        /// <param name="Delay">Delay in Milliseconds between this and last frame.</param>
         public void WriteFrame(Image Image, int Delay = 0)
         {
             lock (_syncLock)
@@ -89,14 +100,28 @@ namespace Screna
             if (_firstFrame) _firstFrame = false;
         }
 
-        public Task WriteFrameAsync(Bitmap Image, int Delay = 0) => Task.Factory.StartNew(() => WriteFrame(Image, Delay));
+        /// <summary>
+        /// Asynchronously writes a Image frame.
+        /// </summary>
+        /// <param name="Image">Image frame to write.</param>
+        /// <param name="Delay">Delay in milliseconds between this frame and last frame.</param>
+        /// <returns>The Task Object.</returns>
+        public Task WriteFrameAsync(Bitmap Image, int Delay) => Task.Factory.StartNew(() => WriteFrame(Image, Delay));
 
+        /// <summary>
+        /// Asynchronously writes a Image frame.
+        /// </summary>
+        /// <param name="Image">Image frame to write.</param>
+        /// <returns>The Task Object.</returns>
         public Task WriteFrameAsync(Bitmap Image) => Task.Factory.StartNew(() => WriteFrame(Image));
 
-        public bool RecordsAudio => false;
+        /// <summary>
+        /// <see cref="GifWriter"/> does not support Audio.
+        /// </summary>
+        public bool SupportsAudio => false;
 
         #region Write
-        void InitHeader(Stream sourceGif, BinaryWriter Writer, int w, int h)
+        void InitHeader(Stream SourceGif, BinaryWriter Writer, int w, int h)
         {
             // File Header
             Writer.Write(FileType.ToCharArray());
@@ -105,23 +130,23 @@ namespace Screna
             Writer.Write((short)(DefaultWidth == 0 ? w : DefaultWidth)); // Initial Logical Width
             Writer.Write((short)(DefaultHeight == 0 ? h : DefaultHeight)); // Initial Logical Height
 
-            sourceGif.Position = SourceGlobalColorInfoPosition;
-            Writer.Write((byte)sourceGif.ReadByte()); // Global Color Table Info
+            SourceGif.Position = SourceGlobalColorInfoPosition;
+            Writer.Write((byte)SourceGif.ReadByte()); // Global Color Table Info
             Writer.Write((byte)0); // Background Color Index
             Writer.Write((byte)0); // Pixel aspect ratio
-            WriteColorTable(sourceGif, Writer);
+            WriteColorTable(SourceGif, Writer);
 
             // App Extension Header for Repeating
-            if (Repeat != -1)
-            {
-                unchecked { Writer.Write((short)ApplicationExtensionBlockIdentifier); }
-                Writer.Write(ApplicationBlockSize);
-                Writer.Write(ApplicationIdentification.ToCharArray());
-                Writer.Write((byte)3); // Application block length
-                Writer.Write((byte)1);
-                Writer.Write((short)Repeat); // Repeat count for images.
-                Writer.Write((byte)0); // terminator
-            }
+            if (Repeat == -1)
+                return;
+
+            unchecked { Writer.Write((short)ApplicationExtensionBlockIdentifier); }
+            Writer.Write(ApplicationBlockSize);
+            Writer.Write(ApplicationIdentification.ToCharArray());
+            Writer.Write((byte)3); // Application block length
+            Writer.Write((byte)1);
+            Writer.Write((short)Repeat); // Repeat count for images.
+            Writer.Write((byte)0); // terminator
         }
 
         static void WriteColorTable(Stream sourceGif, BinaryWriter Writer)
@@ -185,6 +210,9 @@ namespace Screna
         }
         #endregion
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public void Dispose()
         {
             // Complete File

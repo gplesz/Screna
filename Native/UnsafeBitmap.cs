@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 namespace Screna.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct PixelData { public byte Blue, Green, Red, Alpha; }
+    struct PixelData { public byte Blue, Green, Red, Alpha; }
 
-    public unsafe class UnsafeBitmap : IDisposable
+    unsafe class UnsafeBitmap : IDisposable
     {
         readonly Bitmap _inputBitmap;
         BitmapData _bitmapData;

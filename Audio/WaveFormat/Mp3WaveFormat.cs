@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace Screna.Audio
 {
+    /// <summary>
+    /// Mp3 Padding.
+    /// </summary>
     public enum Mp3Padding
     {
         /// <summary>
@@ -21,6 +24,9 @@ namespace Screna.Audio
         Off = 0x00000002
     }
 
+    /// <summary>
+    /// Mp3 Wave format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public class Mp3WaveFormat : WaveFormat
     {
@@ -30,6 +36,9 @@ namespace Screna.Audio
             FramesPerBlock,
             EncoderDelay;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="Mp3WaveFormat"/>
+        /// </summary>
         public Mp3WaveFormat(int SampleRate, int Channels, int BlockSize, int FramesPerBlock = 1, Mp3Padding Padding = Mp3Padding.Off, int EncoderDelay = 0)
             : base(SampleRate, Channels)
         {
@@ -42,6 +51,9 @@ namespace Screna.Audio
             this.Padding = Padding;
         }
 
+        /// <summary>
+        /// Serializes this WaveFormat to a <see cref="BinaryWriter"/>.
+        /// </summary>
         public override void Serialize(BinaryWriter Writer)
         {
             base.Serialize(Writer);

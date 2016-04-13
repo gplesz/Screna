@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Screna
 {
+    /// <summary>
+    /// Primary implementation of the <see cref="IRecorder"/> interface.
+    /// </summary>
     public class Recorder : IRecorder
     {
         #region Fields
@@ -23,9 +26,15 @@ namespace Screna
 
         readonly SynchronizationContext _syncContext;
         #endregion
-
+        
+        /// <summary>
+        /// Stops the Recorder.
+        /// </summary>
         ~Recorder() { Stop(); }
 
+        /// <summary>
+        /// Fired when Recording Stops.
+        /// </summary>
         public event Action<Exception> RecordingStopped;
 
         void RaiseRecordingStopped(Exception E)
@@ -51,7 +60,7 @@ namespace Screna
             _syncContext = SynchronizationContext.Current;
 
             // Audio Init
-            if (_videoEncoder.RecordsAudio
+            if (_videoEncoder.SupportsAudio
                 && AudioProvider != null)
                 AudioProvider.DataAvailable += AudioDataAvailable;
             else _audioProvider = null;
@@ -68,6 +77,10 @@ namespace Screna
             _recordThread?.Start();
         }
 
+        /// <summary>
+        /// Start Recording.
+        /// </summary>
+        /// <param name="Delay">Delay before recording starts.</param>
         public void Start(int Delay = 0)
         {
             new Thread(() =>
@@ -91,6 +104,9 @@ namespace Screna
                 }).Start();
         }
 
+        /// <summary>
+        /// Pause Recording.
+        /// </summary>
         public void Pause()
         {
             if (_recordThread != null)
@@ -99,6 +115,9 @@ namespace Screna
             _audioProvider?.Stop();
         }
 
+        /// <summary>
+        /// Stop Recording and Perform Cleanup.
+        /// </summary>
         public void Stop()
         {
             // Resume if Paused

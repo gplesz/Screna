@@ -6,81 +6,83 @@ using System.Windows.Forms;
 
 namespace Screna.Native
 {
-    public static class User32
+    static class User32
     {
-        [DllImport("user32.dll")]
+        const string DllName = "user32.dll";
+
+        [DllImport(DllName)]
         public static extern IntPtr GetDesktopWindow();
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
-        [DllImport("user32", SetLastError = true)]
+        [DllImport(DllName, SetLastError = true)]
         public static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool DestroyIcon(IntPtr hIcon);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern IntPtr CopyIcon(IntPtr hIcon);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool EnumWindows(EnumWindowsProc proc, IntPtr lParam);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, SetWindowPositionFlags wFlags);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(DllName, SetLastError = true)]
         public static extern int GetWindowText(IntPtr hWnd, [Out] StringBuilder lpString, int nMaxCount);
         
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern WindowStyles GetWindowLong(IntPtr hWnd, GetWindowLongValue nIndex);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool GetCursorInfo(out CursorInfo pci);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool GetIconInfo(IntPtr hIcon, out IconInfo piconinfo);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern IntPtr GetWindow(IntPtr hWnd, GetWindowEnum uCmd);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(DllName, SetLastError = true)]
         public static extern int GetWindowTextLength(IntPtr hWnd);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(DllName, SetLastError = true)]
         public static extern bool GetCursorPos(ref Point lpPoint);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")] 
+        [DllImport(DllName)] 
         public static extern IntPtr GetWindowDC(IntPtr hWnd); 
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(DllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        [DllImport(DllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         public static extern HookProcedureHandle SetWindowsHookEx(int idHook, HookProcedure lpfn, IntPtr hMod, int dwThreadId);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        [DllImport(DllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         public static extern int UnhookWindowsHookEx(IntPtr idHook);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport(DllName, CharSet = CharSet.Auto)]
         public static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
 
-        [DllImport("user32")]
+        [DllImport(DllName)]
         public static extern int GetDoubleClickTime();
 
         //values from Winuser.h in Microsoft SDK.
@@ -142,13 +144,13 @@ namespace Screna.Native
 
             if (lastVirtualKeyCode != 0 && lastIsDead)
             {
-                if (chars != null)
-                {
-                    var sbTemp = new StringBuilder(5);
-                    ToUnicodeEx(lastVirtualKeyCode, lastScanCode, lastKeyState, sbTemp, sbTemp.Capacity, 0, dwhkl);
-                    lastIsDead = false;
-                    lastVirtualKeyCode = 0;
-                }
+                if (chars == null)
+                    return;
+
+                var sbTemp = new StringBuilder(5);
+                ToUnicodeEx(lastVirtualKeyCode, lastScanCode, lastKeyState, sbTemp, sbTemp.Capacity, 0, dwhkl);
+                lastIsDead = false;
+                lastVirtualKeyCode = 0;
 
                 return;
             }
@@ -182,7 +184,7 @@ namespace Screna.Native
             return GetKeyboardLayout(hCurrentWnd); //get the layout identifier for the thread whose window is focused
         }
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern int ToUnicodeEx(int wVirtKey,
             int wScanCode,
             byte[] lpKeyState,
@@ -191,13 +193,13 @@ namespace Screna.Native
             int wFlags,
             IntPtr dwhkl);
 
-        [DllImport("user32.dll")]
+        [DllImport(DllName)]
         public static extern int GetKeyboardState(byte[] pbKeyState);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(DllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern short GetKeyState(int vKey);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport(DllName, CharSet = CharSet.Auto)]
         public static extern IntPtr GetKeyboardLayout(int dwLayout);
     }
 }

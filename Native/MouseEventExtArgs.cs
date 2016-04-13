@@ -6,12 +6,12 @@ using System.Windows.Forms;
 namespace Screna.Native
 {
     /// <summary>
-    ///     Provides extended data for the MouseClickExt and MouseMoveExt events.
+    /// Provides extended data for the MouseClickExt and MouseMoveExt events.
     /// </summary>
-    public class MouseEventExtArgs : MouseEventArgs
+    class MouseEventExtArgs : MouseEventArgs
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="MouseEventExtArgs" /> class.
+        /// Initializes a new instance of the <see cref="MouseEventExtArgs" /> class.
         /// </summary>
         /// <param name="buttons">One of the MouseButtons values indicating which mouse button was pressed.</param>
         /// <param name="clicks">The number of times a mouse button was pressed.</param>

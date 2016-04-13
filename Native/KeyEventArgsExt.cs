@@ -6,7 +6,7 @@ namespace Screna.Native
     /// <summary>
     /// Provides extended argument data for the <see cref='KeyListener.KeyDown' /> or <see cref='KeyListener.KeyUp' /> event.
     /// </summary>
-    public class KeyEventArgsExt : KeyEventArgs
+    class KeyEventArgsExt : KeyEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyEventArgsExt" /> class.

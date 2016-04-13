@@ -2,7 +2,7 @@ using System;
 
 namespace Screna.Native
 {
-    public abstract class BaseListener : IDisposable
+    abstract class BaseListener : IDisposable
     {
         protected BaseListener(Func<Callback, HookResult> subscribe) { Handle = subscribe(Callback); }
 

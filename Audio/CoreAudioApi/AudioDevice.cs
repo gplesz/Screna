@@ -4,24 +4,26 @@ using System.Runtime.InteropServices;
 
 namespace Screna.Audio
 {
+    /// <summary>
+    /// Represents a Wasapi Device.
+    /// </summary>
     public class WasapiAudioDevice
     {
         #region MMDeviceEnumerator
-        static IMMDeviceEnumerator realEnumerator;
+        static readonly IMMDeviceEnumerator RealEnumerator;
 
-        static WasapiAudioDevice() { realEnumerator = new MMDeviceEnumeratorComObject() as IMMDeviceEnumerator; }
+        static WasapiAudioDevice() { RealEnumerator = new MMDeviceEnumeratorComObject() as IMMDeviceEnumerator; }
 
         /// <summary>
         /// Enumerate Audio Endpoints
         /// </summary>
-        /// <param name="dataFlow">Desired DataFlow</param>
-        /// <param name="dwStateMask">State Mask</param>
+        /// <param name="DataFlow">Desired DataFlow</param>
         /// <returns>Device Collection</returns>
-        internal static IEnumerable<WasapiAudioDevice> EnumerateAudioEndPoints(DataFlow dataFlow)
+        internal static IEnumerable<WasapiAudioDevice> EnumerateAudioEndPoints(DataFlow DataFlow)
         {
             IMMDeviceCollection collection;
             const int deviceStateActive = 0x00000001;
-            Marshal.ThrowExceptionForHR(realEnumerator.EnumAudioEndpoints(dataFlow, deviceStateActive, out collection));
+            Marshal.ThrowExceptionForHR(RealEnumerator.EnumAudioEndpoints(DataFlow, deviceStateActive, out collection));
 
             int count;
             Marshal.ThrowExceptionForHR(collection.GetCount(out count));
@@ -37,32 +39,30 @@ namespace Screna.Audio
         /// <summary>
         /// Get Default Endpoint
         /// </summary>
-        /// <param name="dataFlow">Data Flow</param>
-        /// <param name="role">Role</param>
+        /// <param name="DataFlow">Data Flow</param>
+        /// <param name="Role">Role</param>
         /// <returns>Device</returns>
-        internal static WasapiAudioDevice GetDefaultAudioEndpoint(DataFlow dataFlow, Role role)
+        internal static WasapiAudioDevice GetDefaultAudioEndpoint(DataFlow DataFlow, Role Role)
         {
             IMMDevice device;
-            Marshal.ThrowExceptionForHR(realEnumerator.GetDefaultAudioEndpoint(dataFlow, role, out device));
+            Marshal.ThrowExceptionForHR(RealEnumerator.GetDefaultAudioEndpoint(DataFlow, Role, out device));
             return new WasapiAudioDevice(device);
         }
 
         /// <summary>
         /// Get device by ID
         /// </summary>
-        /// <param name="id">Device ID</param>
-        /// <returns>Device</returns>
-        public static WasapiAudioDevice Get(string id)
+        public static WasapiAudioDevice Get(string Id)
         {
             IMMDevice device;
-            Marshal.ThrowExceptionForHR(realEnumerator.GetDevice(id, out device));
+            Marshal.ThrowExceptionForHR(RealEnumerator.GetDevice(Id, out device));
             return new WasapiAudioDevice(device);
         }
         #endregion
 
         readonly IMMDevice _deviceInterface;
 
-        static Guid IID_IAudioClient = new Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2");
+        static Guid _iidIAudioClient = new Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2");
 
         #region Properties
         internal AudioClient AudioClient
@@ -70,14 +70,20 @@ namespace Screna.Audio
             get
             {
                 object result;
-                var ClsCtx_All = 0x1 | 0x2 | 0x4 | 0x10;
-                Marshal.ThrowExceptionForHR(_deviceInterface.Activate(ref IID_IAudioClient, ClsCtx_All, IntPtr.Zero, out result));
+                const int clsCtxAll = 0x1 | 0x2 | 0x4 | 0x10;
+                Marshal.ThrowExceptionForHR(_deviceInterface.Activate(ref _iidIAudioClient, clsCtxAll, IntPtr.Zero, out result));
                 return new AudioClient(result as IAudioClient);
             }
         }
 
+        /// <summary>
+        /// Gets the Device Name.
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Gets the Device ID.
+        /// </summary>
         public string ID
         {
             get
@@ -89,24 +95,27 @@ namespace Screna.Audio
         }
         #endregion
 
-        static readonly PropertyKey PKEY_Device_FriendlyName = new PropertyKey
+        static readonly PropertyKey PkeyDeviceFriendlyName = new PropertyKey
         {
-            formatId = new Guid("a45c254e-df1c-4efd-8020-67d146a850e0"),
-            propertyId = 14
+            FormatId = new Guid("a45c254e-df1c-4efd-8020-67d146a850e0"),
+            PropertyId = 14
         };
 
-        internal WasapiAudioDevice(IMMDevice realDevice)
+        internal WasapiAudioDevice(IMMDevice RealDevice)
         {
-            _deviceInterface = realDevice;
+            _deviceInterface = RealDevice;
 
             IPropertyStore propstore;
-            var StorageAccessMode_Read = 0;
+            const int storageAccessModeRead = 0;
 
-            Marshal.ThrowExceptionForHR(_deviceInterface.OpenPropertyStore(StorageAccessMode_Read, out propstore));
+            Marshal.ThrowExceptionForHR(_deviceInterface.OpenPropertyStore(storageAccessModeRead, out propstore));
 
-            Name = new PropertyStore(propstore)[PKEY_Device_FriendlyName];
+            Name = propstore.Read(PkeyDeviceFriendlyName);
         }
 
+        /// <summary>
+        /// Returns the <see cref="Name"/> of this <see cref="WasapiAudioDevice"/>.
+        /// </summary>
         public override string ToString() => Name;
     }
 }

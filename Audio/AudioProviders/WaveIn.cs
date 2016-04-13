@@ -6,12 +6,25 @@ using System.Threading;
 
 namespace Screna.Audio
 {
+    /// <summary>
+    /// WaveIn Device.
+    /// </summary>
     public class WaveInDevice
     {
+        /// <summary>
+        /// Gets the Device ID.
+        /// </summary>
         public int DeviceNumber { get; }
 
-        public WaveInDevice(int deviceNumber) { DeviceNumber = deviceNumber; }
+        /// <summary>
+        /// Creates a new <see cref="WaveInDevice"/> object.
+        /// </summary>
+        /// <param name="DeviceNumber">Device ID.</param>
+        public WaveInDevice(int DeviceNumber) { this.DeviceNumber = DeviceNumber; }
 
+        /// <summary>
+        /// Gets the Device Name.
+        /// </summary>
         public string Name => GetCapabilities(DeviceNumber).ProductName;
 
         /// <summary>
@@ -22,23 +35,26 @@ namespace Screna.Audio
         /// <summary>
         /// Retrieves the capabilities of a waveIn device
         /// </summary>
-        /// <param name="devNumber">Device to test</param>
+        /// <param name="DevNumber">Device to test</param>
         /// <returns>The WaveIn device capabilities</returns>
-        static WaveInCapabilities GetCapabilities(int devNumber)
+        static WaveInCapabilities GetCapabilities(int DevNumber)
         {
             var caps = new WaveInCapabilities();
             var structSize = Marshal.SizeOf(caps);
-            MmException.Try(WaveInterop.waveInGetDevCaps((IntPtr)devNumber, out caps, structSize), "waveInGetDevCaps");
+            MmException.Try(WaveInterop.waveInGetDevCaps((IntPtr)DevNumber, out caps, structSize), "waveInGetDevCaps");
             return caps;
         }
 
         /// <summary>
         /// Checks to see if a given SupportedWaveFormat is supported
         /// </summary>
-        /// <param name="waveFormat">The SupportedWaveFormat</param>
+        /// <param name="WaveFormat">The SupportedWaveFormat</param>
         /// <returns>true if supported</returns>
-        public bool SupportsWaveFormat(SupportedWaveFormat waveFormat) => GetCapabilities(DeviceNumber).SupportedFormats.HasFlag(waveFormat);
+        public bool SupportsWaveFormat(SupportedWaveFormat WaveFormat) => GetCapabilities(DeviceNumber).SupportedFormats.HasFlag(WaveFormat);
 
+        /// <summary>
+        /// Enumerates all <see cref="WaveInDevice"/>(s).
+        /// </summary>
         public static IEnumerable<WaveInDevice> Enumerate()
         {
             var n = DeviceCount;
@@ -47,22 +63,24 @@ namespace Screna.Audio
                 yield return new WaveInDevice(i);
         }
 
+        /// <summary>
+        /// Gets the Default <see cref="WaveInDevice"/>.
+        /// </summary>
         public static WaveInDevice DefaultDevice => new WaveInDevice(0);
     }
 
     /// <summary>
     /// Recording using waveIn api with event callbacks.
-    /// Use this for recording in non-gui applications
     /// Events are raised as recorded buffers are made available
     /// </summary>
     public class WaveIn : IAudioProvider
     {
-        readonly AutoResetEvent callbackEvent;
-        readonly SynchronizationContext syncContext;
-        readonly int DeviceNumber;
-        IntPtr waveInHandle;
-        volatile bool recording;
-        WaveInBuffer[] buffers;
+        readonly AutoResetEvent _callbackEvent;
+        readonly SynchronizationContext _syncContext;
+        readonly int _deviceNumber;
+        IntPtr _waveInHandle;
+        volatile bool _recording;
+        WaveInBuffer[] _buffers;
 
         /// <summary>
         /// Indicates recorded data is available 
@@ -75,22 +93,28 @@ namespace Screna.Audio
         public event Action<Exception> RecordingStopped;
 
         /// <summary>
-        /// Prepares a Wave input device for recording
+        /// Creates a new instance of <see cref="WaveIn"/>.
         /// </summary>
         public WaveIn(int DeviceNumber = 0)
         {
-            callbackEvent = new AutoResetEvent(false);
-            syncContext = SynchronizationContext.Current;
-            this.DeviceNumber = DeviceNumber;
+            _callbackEvent = new AutoResetEvent(false);
+            _syncContext = SynchronizationContext.Current;
+            _deviceNumber = DeviceNumber;
             WaveFormat = new WaveFormat(8000, 16, 1);
             BufferMilliseconds = 100;
             NumberOfBuffers = 3;
             IsSynchronizable = false;
         }
 
-        public WaveIn(int DeviceNumber, int FrameRate, WaveFormat wf) : this(DeviceNumber)
+        /// <summary>
+        /// Creates a new instance of <see cref="WaveIn"/> to be used with Video capture.
+        /// </summary>
+        /// <param name="DeviceNumber">Device to use.</param>
+        /// <param name="FrameRate">Frame Rate of video capture.</param>
+        /// <param name="Wf">Audio Wave format.</param>
+        public WaveIn(int DeviceNumber, int FrameRate, WaveFormat Wf) : this(DeviceNumber)
         {
-            WaveFormat = wf;
+            WaveFormat = Wf;
             // Buffer size to store duration of 1 frame 
             BufferMilliseconds = (int)Math.Ceiling(1000 / (decimal)FrameRate);
             IsSynchronizable = true;
@@ -113,32 +137,32 @@ namespace Screna.Audio
             if (bufferSize % WaveFormat.BlockAlign != 0)
                 bufferSize -= bufferSize % WaveFormat.BlockAlign;
 
-            buffers = new WaveInBuffer[NumberOfBuffers];
-            for (var n = 0; n < buffers.Length; n++)
-                buffers[n] = new WaveInBuffer(waveInHandle, bufferSize);
+            _buffers = new WaveInBuffer[NumberOfBuffers];
+            for (var n = 0; n < _buffers.Length; n++)
+                _buffers[n] = new WaveInBuffer(_waveInHandle, bufferSize);
         }
 
         void OpenWaveInDevice()
         {
-            var CallbackEvent = 0x50000;
+            const int callbackEvent = 0x50000;
 
             CloseWaveInDevice();
-            var result = WaveInterop.waveInOpen(out waveInHandle, (IntPtr)DeviceNumber, WaveFormat,
-                callbackEvent.SafeWaitHandle.DangerousGetHandle(), IntPtr.Zero, CallbackEvent);
+            var result = WaveInterop.waveInOpen(out _waveInHandle, (IntPtr)_deviceNumber, WaveFormat,
+                _callbackEvent.SafeWaitHandle.DangerousGetHandle(), IntPtr.Zero, callbackEvent);
             MmException.Try(result, "waveInOpen");
             CreateBuffers();
         }
 
         /// <summary>
-        /// Start recording
+        /// Start recording.
         /// </summary>
         public void Start()
         {
-            if (recording)
+            if (_recording)
                 throw new InvalidOperationException("Already recording");
             OpenWaveInDevice();
-            MmException.Try(WaveInterop.waveInStart(waveInHandle), "waveInStart");
-            recording = true;
+            MmException.Try(WaveInterop.waveInStart(_waveInHandle), "waveInStart");
+            _recording = true;
             ThreadPool.QueueUserWorkItem(state => RecordThread(), null);
         }
 
@@ -149,26 +173,26 @@ namespace Screna.Audio
             catch (Exception e) { exception = e; }
             finally
             {
-                recording = false;
+                _recording = false;
                 RaiseRecordingStoppedEvent(exception);
             }
         }
 
         void DoRecording()
         {
-            foreach (var buffer in buffers.Where(buffer => !buffer.InQueue))
+            foreach (var buffer in _buffers.Where(Buffer => !Buffer.InQueue))
                 buffer.Reuse();
 
-            while (recording)
+            while (_recording)
             {
-                if (!callbackEvent.WaitOne())
+                if (!_callbackEvent.WaitOne())
                     continue;
 
                 // requeue any buffers returned to us
-                if (!recording)
+                if (!_recording)
                     continue;
 
-                foreach (var buffer in buffers.Where(buffer => buffer.Done))
+                foreach (var buffer in _buffers.Where(Buffer => Buffer.Done))
                 {
                     DataAvailable?.Invoke(buffer.Data, buffer.BytesRecorded);
 
@@ -184,17 +208,20 @@ namespace Screna.Audio
             if (handler == null)
                 return;
 
-            if (syncContext == null)
+            if (_syncContext == null)
                 handler(e);
 
-            else syncContext.Post(state => handler(e), null);
+            else _syncContext.Post(State => handler(e), null);
         }
 
+        /// <summary>
+        /// Stop Recording.
+        /// </summary>
         public void Stop()
         {
-            recording = false;
-            callbackEvent.Set(); // signal the thread to exit
-            MmException.Try(WaveInterop.waveInStop(waveInHandle), "waveInStop");
+            _recording = false;
+            _callbackEvent.Set(); // signal the thread to exit
+            MmException.Try(WaveInterop.waveInStop(_waveInHandle), "waveInStop");
         }
 
         /// <summary>
@@ -205,40 +232,46 @@ namespace Screna.Audio
         /// <summary>
         /// Dispose pattern
         /// </summary>
-        protected virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool Disposing)
         {
-            if (disposing)
-            {
-                if (recording)
-                    Stop();
+            if (!Disposing)
+                return;
 
-                CloseWaveInDevice();
-            }
+            if (_recording)
+                Stop();
+
+            CloseWaveInDevice();
         }
 
         void CloseWaveInDevice()
         {
             // Some drivers need the reset to properly release buffers
-            WaveInterop.waveInReset(waveInHandle);
+            WaveInterop.waveInReset(_waveInHandle);
 
-            if (buffers != null)
+            if (_buffers != null)
             {
-                foreach (var t in buffers)
+                foreach (var t in _buffers)
                     t.Dispose();
 
-                buffers = null;
+                _buffers = null;
             }
 
-            WaveInterop.waveInClose(waveInHandle);
-            waveInHandle = IntPtr.Zero;
+            WaveInterop.waveInClose(_waveInHandle);
+            _waveInHandle = IntPtr.Zero;
         }
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// <see cref="WaveIn"/> is synchronizable.
+        /// </summary>
         public bool IsSynchronizable { get; }
     }
 }

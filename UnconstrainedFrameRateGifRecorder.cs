@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace Screna
 {
+    /// <summary>
+    /// An <see cref="IRecorder"/> which records to a Gif using Delay for each frame instead of Frame Rate.
+    /// </summary>
     public class UnconstrainedFrameRateGifRecorder : IRecorder
     {
         #region Fields
@@ -15,9 +18,17 @@ namespace Screna
         ManualResetEvent _stopCapturing = new ManualResetEvent(false),
             _continueCapturing = new ManualResetEvent(false);
         #endregion
-
+        
+        /// <summary>
+        /// Stops Recording.
+        /// </summary>
         ~UnconstrainedFrameRateGifRecorder() { Stop(); }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="UnconstrainedFrameRateGifRecorder"/>.
+        /// </summary>
+        /// <param name="Encoder">The <see cref="GifWriter"/> to write into.</param>
+        /// <param name="ImageProvider">The <see cref="IImageProvider"/> providing the individual frames.</param>
         public UnconstrainedFrameRateGifRecorder(GifWriter Encoder, IImageProvider ImageProvider)
         {
             // Init Fields
@@ -37,8 +48,15 @@ namespace Screna
             _recordThread?.Start();
         }
 
+        /// <summary>
+        /// Fired when Recording Stops.
+        /// </summary>
         public event Action<Exception> RecordingStopped;
 
+        /// <summary>
+        /// Start Recording.
+        /// </summary>
+        /// <param name="Delay">Delay before recording starts.</param>
         public void Start(int Delay = 0)
         {
             new Thread(e =>
@@ -54,6 +72,9 @@ namespace Screna
             }).Start(Delay);
         }
 
+        /// <summary>
+        /// Stop Recording and Perform Cleanup.
+        /// </summary>
         public void Stop()
         {
             // Resume if Paused
@@ -91,13 +112,16 @@ namespace Screna
             }
 
             // Writers
-            if (_videoEncoder != null)
-            {
-                _videoEncoder.Dispose();
-                _videoEncoder = null;
-            }
+            if (_videoEncoder == null)
+                return;
+
+            _videoEncoder.Dispose();
+            _videoEncoder = null;
         }
 
+        /// <summary>
+        /// Pause Recording.
+        /// </summary>
         public void Pause() { if (_recordThread != null) _continueCapturing.Reset(); }
 
         void Record()

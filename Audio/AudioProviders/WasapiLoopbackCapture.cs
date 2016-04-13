@@ -3,46 +3,63 @@ using System.Collections.Generic;
 
 namespace Screna.Audio
 {
+    /// <summary>
+    /// Loopback Capture using Wasapi
+    /// </summary>
     public sealed class WasapiLoopbackCapture : WasapiCapture
     {
-        WasapiSilenceOut SilencePlayer;
+        readonly WasapiSilenceOut _silencePlayer;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="WasapiLoopbackCapture"/> using <see cref="DefaultDevice"/>.
+        /// </summary>
+        /// <param name="IncludeSilence">Whether to record Silence.</param>
         public WasapiLoopbackCapture(bool IncludeSilence) : this(DefaultDevice, IncludeSilence) { }
 
         /// <summary>
         /// Initialises a new instance of the WASAPI capture class
         /// </summary>
         /// <param name="LoopbackDevice">Capture device to use</param>
+        /// <param name="IncludeSilence">Whether to record Silence.</param>
         public WasapiLoopbackCapture(WasapiAudioDevice LoopbackDevice, bool IncludeSilence = true)
             : base(LoopbackDevice)
         {
             if (IncludeSilence)
-                SilencePlayer = new WasapiSilenceOut(LoopbackDevice, 100);
+                _silencePlayer = new WasapiSilenceOut(LoopbackDevice, 100);
         }
 
+        /// <summary>
+        /// Starts Capture.
+        /// </summary>
         public override void Start()
         {
-            SilencePlayer?.Play();
+            _silencePlayer?.Play();
 
             base.Start();
         }
 
+        /// <summary>
+        /// Stops Capture.
+        /// </summary>
         public override void Stop()
         {
             base.Stop();
 
-            SilencePlayer?.Stop();
+            _silencePlayer?.Stop();
         }
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
 
-            if (SilencePlayer == null)
+            if (_silencePlayer == null)
                 return;
 
-            SilencePlayer.Dispose();
-            SilencePlayer.Stop();
+            _silencePlayer.Dispose();
+            _silencePlayer.Stop();
         }
 
         /// <summary>
@@ -51,6 +68,9 @@ namespace Screna.Audio
         /// <returns>The default audio loopback capture device</returns>
         public new static WasapiAudioDevice DefaultDevice => WasapiAudioDevice.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
+        /// <summary>
+        /// Enumerates all Wasapi Loopback Devices.
+        /// </summary>
         public new static IEnumerable<WasapiAudioDevice> EnumerateDevices() => WasapiAudioDevice.EnumerateAudioEndPoints(DataFlow.Render);
 
         /// <summary>

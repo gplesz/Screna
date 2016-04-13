@@ -6,14 +6,36 @@ using SysParams = System.Windows.SystemParameters;
 
 namespace Screna
 {
+    /// <summary>
+    /// Captures the specified window which can change dynamically. 
+    /// The captured image is of the size of the whole desktop to accomodate any change in the Window.
+    /// </summary>
     public class WindowProvider : IImageProvider
     {
-        public static readonly int DesktopHeight, DesktopWidth;
+        /// <summary>
+        /// Height of the Desktop.
+        /// </summary>
+        public static readonly int DesktopHeight;
 
+        /// <summary>
+        /// Width of the Desktop.
+        /// </summary>
+        public static readonly int DesktopWidth;
+
+        /// <summary>
+        /// A <see cref="Rectangle"/> representing the entire Desktop.
+        /// </summary>
         public static readonly Rectangle DesktopRectangle;
 
-        public static readonly IntPtr DesktopHandle = User32.GetDesktopWindow(),
-            TaskbarHandle = User32.FindWindow("Shell_TrayWnd", null);
+        /// <summary>
+        /// Desktop Handle.
+        /// </summary>
+        public static readonly IntPtr DesktopHandle = User32.GetDesktopWindow();
+
+        /// <summary>
+        /// Taskbar Handle: Shell_TrayWnd.
+        /// </summary>
+        public static readonly IntPtr TaskbarHandle = User32.FindWindow("Shell_TrayWnd", null);
 
         static WindowProvider()
         {
@@ -42,6 +64,9 @@ namespace Screna
             _backgroundColor = BackgroundColor;
         }
 
+        /// <summary>
+        /// Capture Image.
+        /// </summary>
         public Bitmap Capture()
         {
             var windowHandle = _hWnd();
@@ -75,10 +100,19 @@ namespace Screna
             return bmp;
         }
 
+        /// <summary>
+        /// Gets the Height of Captured Image = Height of Desktop
+        /// </summary>
         public int Height => DesktopHeight;
 
+        /// <summary>
+        /// Gets the Width of Captured Image = Width of Desktop
+        /// </summary>
         public int Width => DesktopWidth;
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public void Dispose()
         {
             foreach (var overlay in _overlays)

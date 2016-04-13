@@ -4,56 +4,56 @@ using System.IO;
 namespace Screna.Audio
 {
     /// <summary>
-    /// This class writes WAV data to a .wav file on disk
+    /// Writes Wave data to a .wav file on disk.
     /// </summary>
     public class WaveFileWriter : IAudioFileWriter
     {
-        Stream outStream;
-        readonly BinaryWriter writer;
-        readonly long dataSizePos, factSampleCountPos;
-        long dataChunkSize;
+        Stream _outStream;
+        readonly BinaryWriter _writer;
+        readonly long _dataSizePos, _factSampleCountPos;
+        long _dataChunkSize;
 
         /// <summary>
-        /// WaveFileWriter that actually writes to a stream
+        /// Creates a new instance of <see cref="WaveFileWriter"/>.
         /// </summary>
-        /// <param name="outStream">Stream to be written to</param>
-        /// <param name="format">Wave format to use</param>
-        public WaveFileWriter(Stream outStream, WaveFormat format)
+        /// <param name="OutStream">Stream to be written to</param>
+        /// <param name="Format">Wave format to use</param>
+        public WaveFileWriter(Stream OutStream, WaveFormat Format)
         {
-            this.outStream = outStream;
-            WaveFormat = format;
-            writer = new BinaryWriter(outStream, System.Text.Encoding.UTF8);
-            writer.Write(System.Text.Encoding.UTF8.GetBytes("RIFF"));
-            writer.Write(0); // placeholder
-            writer.Write(System.Text.Encoding.UTF8.GetBytes("WAVE"));
+            _outStream = OutStream;
+            WaveFormat = Format;
+            _writer = new BinaryWriter(OutStream, System.Text.Encoding.UTF8);
+            _writer.Write(System.Text.Encoding.UTF8.GetBytes("RIFF"));
+            _writer.Write(0); // placeholder
+            _writer.Write(System.Text.Encoding.UTF8.GetBytes("WAVE"));
 
-            writer.Write(System.Text.Encoding.UTF8.GetBytes("fmt "));
+            _writer.Write(System.Text.Encoding.UTF8.GetBytes("fmt "));
             
-            writer.Write(18 + format.ExtraSize); // wave format length
-            format.Serialize(writer);
+            _writer.Write(18 + Format.ExtraSize); // wave format length
+            Format.Serialize(_writer);
 
             // CreateFactChunk
             if (HasFactChunk)
             {
-                writer.Write(System.Text.Encoding.UTF8.GetBytes("fact"));
-                writer.Write(4);
-                factSampleCountPos = outStream.Position;
-                writer.Write(0); // number of samples
+                _writer.Write(System.Text.Encoding.UTF8.GetBytes("fact"));
+                _writer.Write(4);
+                _factSampleCountPos = OutStream.Position;
+                _writer.Write(0); // number of samples
             }
 
             // WriteDataChunkHeader
-            writer.Write(System.Text.Encoding.UTF8.GetBytes("data"));
-            dataSizePos = outStream.Position;
-            writer.Write(0); // placeholder
+            _writer.Write(System.Text.Encoding.UTF8.GetBytes("data"));
+            _dataSizePos = OutStream.Position;
+            _writer.Write(0); // placeholder
         }
 
         /// <summary>
-        /// Creates a new WaveFileWriter
+        /// Creates a new instance of <see cref="WaveFileWriter"/>.
         /// </summary>
-        /// <param name="filename">The filename to write to</param>
-        /// <param name="format">The Wave Format of the output data</param>
-        public WaveFileWriter(string filename, WaveFormat format)
-            : this(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.Read), format) { }
+        /// <param name="Filename">The filename to write to</param>
+        /// <param name="Format">The Wave Format of the output data</param>
+        public WaveFileWriter(string Filename, WaveFormat Format)
+            : this(new FileStream(Filename, FileMode.Create, FileAccess.Write, FileShare.Read), Format) { }
 
         bool HasFactChunk => WaveFormat.Encoding != WaveFormatEncoding.Pcm &&
                              WaveFormat.BitsPerSample != 0;
@@ -61,7 +61,7 @@ namespace Screna.Audio
         /// <summary>
         /// Number of bytes of audio in the data chunk
         /// </summary>
-        public long Length => dataChunkSize;
+        public long Length => _dataChunkSize;
 
         /// <summary>
         /// WaveFormat of this wave file
@@ -71,56 +71,56 @@ namespace Screna.Audio
         /// <summary>
         /// Gets the Position in the WaveFile (i.e. number of bytes written so far)
         /// </summary>
-        public long Position => dataChunkSize;
+        public long Position => _dataChunkSize;
 
         /// <summary>
         /// Appends bytes to the WaveFile (assumes they are already in the correct format)
         /// </summary>
-        /// <param name="data">the buffer containing the wave data</param>
-        /// <param name="offset">the offset from which to start writing</param>
-        /// <param name="count">the number of bytes to write</param>
-        public void Write(byte[] data, int offset, int count)
+        /// <param name="Data">the buffer containing the wave data</param>
+        /// <param name="Offset">the offset from which to start writing</param>
+        /// <param name="Count">the number of bytes to write</param>
+        public void Write(byte[] Data, int Offset, int Count)
         {
-            if (outStream.Length + count > uint.MaxValue)
-                throw new ArgumentException("WAV file too large", nameof(count));
-            outStream.Write(data, offset, count);
-            dataChunkSize += count;
+            if (_outStream.Length + Count > uint.MaxValue)
+                throw new ArgumentException("WAV file too large", nameof(Count));
+            _outStream.Write(Data, Offset, Count);
+            _dataChunkSize += Count;
         }
 
-        readonly byte[] value24 = new byte[3]; // keep this around to save us creating it every time
+        readonly byte[] _value24 = new byte[3]; // keep this around to save us creating it every time
 
         /// <summary>
         /// Writes a single sample to the Wave file
         /// </summary>
-        /// <param name="sample">the sample to write (assumed floating point with 1.0f as max value)</param>
-        public void WriteSample(float sample)
+        /// <param name="Sample">the sample to write (assumed floating point with 1.0f as max value)</param>
+        public void WriteSample(float Sample)
         {
             switch (WaveFormat.BitsPerSample)
             {
                 case 16:
-                    writer.Write((short)(short.MaxValue * sample));
-                    dataChunkSize += 2;
+                    _writer.Write((short)(short.MaxValue * Sample));
+                    _dataChunkSize += 2;
                     break;
 
                 case 24:
-                    var value = BitConverter.GetBytes((int)(int.MaxValue * sample));
-                    value24[0] = value[1];
-                    value24[1] = value[2];
-                    value24[2] = value[3];
-                    writer.Write(value24);
-                    dataChunkSize += 3;
+                    var value = BitConverter.GetBytes((int)(int.MaxValue * Sample));
+                    _value24[0] = value[1];
+                    _value24[1] = value[2];
+                    _value24[2] = value[3];
+                    _writer.Write(_value24);
+                    _dataChunkSize += 3;
                     break;
 
                 default:
                     if (WaveFormat.BitsPerSample == 32 && WaveFormat.Encoding == WaveFormatEncoding.Extensible)
                     {
-                        writer.Write(ushort.MaxValue * (int)sample);
-                        dataChunkSize += 4;
+                        _writer.Write(ushort.MaxValue * (int)Sample);
+                        _dataChunkSize += 4;
                     }
                     else if (WaveFormat.Encoding == WaveFormatEncoding.Float)
                     {
-                        writer.Write(sample);
-                        dataChunkSize += 4;
+                        _writer.Write(Sample);
+                        _dataChunkSize += 4;
                     }
                     else throw new InvalidOperationException("Only 16, 24 or 32 bit PCM or IEEE float audio data supported");
                     break;
@@ -153,8 +153,8 @@ namespace Screna.Audio
             {
                 case 16:
                     for (var sample = 0; sample < count; sample++)
-                        writer.Write(samples[sample + offset]);
-                    dataChunkSize += count * 2;
+                        _writer.Write(samples[sample + offset]);
+                    _dataChunkSize += count * 2;
                     break;
 
                 case 24:
@@ -162,27 +162,27 @@ namespace Screna.Audio
                     for (var sample = 0; sample < count; sample++)
                     {
                         var value = BitConverter.GetBytes(ushort.MaxValue * samples[sample + offset]);
-                        value24[0] = value[1];
-                        value24[1] = value[2];
-                        value24[2] = value[3];
-                        writer.Write(value24);
+                        _value24[0] = value[1];
+                        _value24[1] = value[2];
+                        _value24[2] = value[3];
+                        _writer.Write(_value24);
                     }
-                    dataChunkSize += count * 3;
+                    _dataChunkSize += count * 3;
                     break;
 
                 default:
                     if (WaveFormat.BitsPerSample == 32 && WaveFormat.Encoding == WaveFormatEncoding.Extensible)
                     {
                         for (var sample = 0; sample < count; sample++)
-                            writer.Write(ushort.MaxValue * samples[sample + offset]);
-                        dataChunkSize += count * 4;
+                            _writer.Write(ushort.MaxValue * samples[sample + offset]);
+                        _dataChunkSize += count * 4;
                     }
                     // IEEE float data
                     else if (WaveFormat.BitsPerSample == 32 && WaveFormat.Encoding == WaveFormatEncoding.Float)
                     {
                         for (var sample = 0; sample < count; sample++)
-                            writer.Write(samples[sample + offset] / (float)(short.MaxValue + 1));
-                        dataChunkSize += count * 4;
+                            _writer.Write(samples[sample + offset] / (float)(short.MaxValue + 1));
+                        _dataChunkSize += count * 4;
                     }
                     else throw new InvalidOperationException("Only 16, 24 or 32 bit PCM or IEEE float audio data supported");
                     break;
@@ -195,11 +195,14 @@ namespace Screna.Audio
         /// </summary>
         public void Flush()
         {
-            var pos = writer.BaseStream.Position;
-            UpdateHeader(writer);
-            writer.BaseStream.Position = pos;
+            var pos = _writer.BaseStream.Position;
+            UpdateHeader(_writer);
+            _writer.BaseStream.Position = pos;
         }
 
+        /// <summary>
+        /// Closes the file and frees all resources.
+        /// </summary>
         public void Dispose()
         {
             DoDispose();
@@ -209,21 +212,20 @@ namespace Screna.Audio
         /// <summary>
         /// Actually performs the close, making sure the header contains the correct data
         /// </summary>
-        /// <param name="disposing">True if called from <see>Dispose</see></param>
         void DoDispose()
         {
-            if (outStream != null)
+            if (_outStream != null)
             {
-                try { UpdateHeader(writer); }
+                try { UpdateHeader(_writer); }
                 finally
                 {
                     // in a finally block as we don't want the FileStream to run its disposer in
                     // the GC thread if the code above caused an IOException (e.g. due to disk full)
-                    outStream.Close(); // will close the underlying base stream
-                    outStream = null;
+                    _outStream.Close(); // will close the underlying base stream
+                    _outStream = null;
                 }
             }
-            writer?.Dispose();
+            _writer?.Dispose();
         }
 
         /// <summary>
@@ -235,7 +237,7 @@ namespace Screna.Audio
 
             // UpdateRiffChunk
             writer.Seek(4, SeekOrigin.Begin);
-            writer.Write((uint)(outStream.Length - 8));
+            writer.Write((uint)(_outStream.Length - 8));
 
             // UpdateFactChunk
             if (HasFactChunk)
@@ -243,15 +245,15 @@ namespace Screna.Audio
                 var bitsPerSample = WaveFormat.BitsPerSample * WaveFormat.Channels;
                 if (bitsPerSample != 0)
                 {
-                    writer.Seek((int)factSampleCountPos, SeekOrigin.Begin);
+                    writer.Seek((int)_factSampleCountPos, SeekOrigin.Begin);
 
-                    writer.Write((int)(dataChunkSize * 8 / bitsPerSample));
+                    writer.Write((int)(_dataChunkSize * 8 / bitsPerSample));
                 }
             }
 
             // UpdateDataChunk
-            writer.Seek((int)dataSizePos, SeekOrigin.Begin);
-            writer.Write((uint)dataChunkSize);
+            writer.Seek((int)_dataSizePos, SeekOrigin.Begin);
+            writer.Write((uint)_dataChunkSize);
         }
 
         /// <summary>

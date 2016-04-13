@@ -3,10 +3,15 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Screna.Audio;
 
 namespace Screna
 {
+    /// <summary>
+    /// Collection of utility methods.
+    /// </summary>
     public static class Extensions
     {
         /// <summary>
@@ -43,7 +48,7 @@ namespace Screna
         /// <summary>
         /// Removes the Pixels on Edges matching TrimColor(default is Transparent) from the Image
         /// </summary>
-        public static unsafe Bitmap CropEmptyEdges(this Bitmap Image, Color TrimColor = default(Color))
+        internal static unsafe Bitmap CropEmptyEdges(this Bitmap Image, Color TrimColor = default(Color))
         {
             if (Image == null)
                 return null;
@@ -134,24 +139,24 @@ namespace Screna
                         continue;
                     }
 
-                    if (r.Bottom == -1)
-                    {
-                        if ((TrimColor.A == 0 && pixel->Alpha != 0) ||
-                            (TrimColor.R != pixel->Red &
-                             TrimColor.G != pixel->Green &
-                             TrimColor.B != pixel->Blue))
-                        {
-                            r.Bottom = y + 1;
-                            break;
-                        }
+                    if (r.Bottom != -1)
+                        continue;
 
-                        if (x == sizeX - 1)
-                        {
-                            y--;
-                            x = 0;
-                        }
-                        else x++;
+                    if ((TrimColor.A == 0 && pixel->Alpha != 0) ||
+                        (TrimColor.R != pixel->Red &
+                         TrimColor.G != pixel->Green &
+                         TrimColor.B != pixel->Blue))
+                    {
+                        r.Bottom = y + 1;
+                        break;
                     }
+
+                    if (x == sizeX - 1)
+                    {
+                        y--;
+                        x = 0;
+                    }
+                    else x++;
                 }
             }
 
@@ -165,18 +170,21 @@ namespace Screna
             return final;
         }
 
+        /// <summary>
+        /// Draws an <see cref="IOverlay"/> over an <see cref="Image"/>.
+        /// </summary>
         public static void Draw(this IOverlay overlay, Image img, Point Offset = default(Point))
         {
             using (var g = Graphics.FromImage(img))
                 overlay.Draw(g, Offset);
         }
 
-        public static Rectangle ToRectangle(this RECT r) => new Rectangle(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top);
+        internal static Rectangle ToRectangle(this RECT r) => new Rectangle(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top);
 
         /// <summary>
         /// Creates a Transparent Bitmap from a combination of a Bitmap on a White Background and another on a Black Background
         /// </summary>
-        public static unsafe Bitmap DifferentiateAlpha(Bitmap WhiteBitmap, Bitmap BlackBitmap)
+        internal static unsafe Bitmap DifferentiateAlpha(Bitmap WhiteBitmap, Bitmap BlackBitmap)
         {
             if (WhiteBitmap == null || BlackBitmap == null ||
                 WhiteBitmap.Width != BlackBitmap.Width ||
@@ -255,7 +263,7 @@ namespace Screna
             }
         }
 
-        public static void FlipVertical(byte[] source, int srcOffset, byte[] destination, int destOffset, int height, int stride)
+        internal static void FlipVertical(byte[] source, int srcOffset, byte[] destination, int destOffset, int height, int stride)
         {
             var src = srcOffset;
             var dest = destOffset + (height - 1) * stride;
@@ -315,6 +323,27 @@ namespace Screna
                 rate /= 5;
                 scale /= 5;
             }
+        }
+
+        internal static string Read(this IPropertyStore StoreInterface, PropertyKey Key)
+        {
+            int count;
+            Marshal.ThrowExceptionForHR(StoreInterface.GetCount(out count));
+
+            for (var i = 0; i < count; i++)
+            {
+                PropertyKey ikey;
+                Marshal.ThrowExceptionForHR(StoreInterface.GetAt(i, out ikey));
+
+                if (!ikey.EqualTo(Key))
+                    continue;
+
+                PropString result;
+                Marshal.ThrowExceptionForHR(StoreInterface.GetValue(ref ikey, out result));
+                return result.Value;
+            }
+
+            return "Unknown";
         }
     }
 }

@@ -5,10 +5,11 @@ using System.Windows.Forms;
 namespace Screna
 {
     /// <summary>
-    /// Draws MouseClicks and/or Keystrokes on an Image
+    /// Draws Mouse Clicks and/or Keystrokes on an Image.
     /// </summary>
     public class MouseKeyHook : IOverlay
     {
+        #region Fields
         MouseListener _clickHook;
         KeyListener _keyHook;
 
@@ -18,19 +19,46 @@ namespace Screna
             _alt;
 
         Keys _lastKeyPressed = Keys.None;
+        #endregion
 
-        public Pen ClickStrokePen { get; set; }
+        #region Properties
+        /// <summary>
+        /// Gets or Sets the <see cref="Brush"/> used to fill Click circles.
+        /// </summary>
+        public Brush ClickBrush { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the radius of Click circles.
+        /// </summary>
         public double ClickRadius { get; set; }
-        public Font KeyStrokeFont { get; set; }
-        public Brush KeyStrokeBrush { get; set; }
-        public Point KeyStrokeLocation { get; set; }
 
+        /// <summary>
+        /// Gets or Sets the Keystroke <see cref="Font"/>.
+        /// </summary>
+        public Font KeyStrokeFont { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the Keystroke <see cref="Brush"/>.
+        /// </summary>
+        public Brush KeyStrokeBrush { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the Keystroke Location.
+        /// </summary>
+        public Point KeyStrokeLocation { get; set; }
+        #endregion
+
+        /// <summary>
+        /// Creates a new instance of <see cref="MouseKeyHook"/>.
+        /// </summary>
+        /// <param name="CaptureMouseClicks">Whether to capture Mouse CLicks.</param>
+        /// <param name="CaptureKeystrokes">Whether to capture Keystrokes.</param>
         public MouseKeyHook(bool CaptureMouseClicks, bool CaptureKeystrokes)
         {
-            ClickStrokePen = new Pen(Color.Black, 1);
-            ClickRadius = 40;
-            KeyStrokeFont = new Font(FontFamily.GenericMonospace, 60);
+            ClickBrush = new SolidBrush(Color.FromArgb(100, Color.DarkGray));
+            ClickRadius = 25;
             KeyStrokeBrush = Brushes.Black;
+            KeyStrokeFont = new Font(FontFamily.GenericMonospace, 60);
             KeyStrokeLocation = new Point(100, 100);
 
             if (CaptureMouseClicks)
@@ -81,18 +109,20 @@ namespace Screna
             _alt = e.Alt;
         }
 
+        /// <summary>
+        /// Draws overlay.
+        /// </summary>
         public void Draw(Graphics g, Point Offset = default(Point))
         {
             if (_mouseClicked)
             {
                 var curPos = MouseCursor.CursorPosition;
                 var d = (float)(ClickRadius * 2);
-
-                g.DrawArc(ClickStrokePen,
-                    curPos.X - 40 - Offset.X,
-                    curPos.Y - 40 - Offset.Y,
-                    d, d,
-                    0, 360);
+                
+                g.FillEllipse(ClickBrush,
+                    curPos.X - (float)ClickRadius - Offset.X,
+                    curPos.Y - (float)ClickRadius - Offset.Y,
+                    d, d);
 
                 _mouseClicked = false;
             }
@@ -102,9 +132,14 @@ namespace Screna
 
             string toWrite = null;
 
-            if (_control) toWrite += "Ctrl+";
-            if (_shift) toWrite += "Shift+";
-            if (_alt) toWrite += "Alt+";
+            if (_control)
+                toWrite += "Ctrl+";
+
+            if (_shift)
+                toWrite += "Shift+";
+
+            if (_alt)
+                toWrite += "Alt+";
 
             toWrite += _lastKeyPressed.ToString();
 
@@ -117,6 +152,9 @@ namespace Screna
             _lastKeyPressed = Keys.None;
         }
 
+        /// <summary>
+        /// Frees all resources used by this object.
+        /// </summary>
         public void Dispose()
         {
             if (_clickHook != null)

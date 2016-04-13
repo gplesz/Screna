@@ -22,6 +22,9 @@ namespace Screna.Audio
         /// </summary>
         void Stop();
 
+        /// <summary>
+        /// Whether this <see cref="IAudioProvider"/> can be synchronized with video.
+        /// </summary>
         bool IsSynchronizable { get; }
 
         /// <summary>

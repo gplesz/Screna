@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace Screna.Native
 {
-    public class MouseListener : BaseListener
+    class MouseListener : BaseListener
     {
         readonly ButtonSet m_DoubleDown, m_SingleDown;
         Point m_PreviousPosition;
@@ -64,7 +64,7 @@ namespace Screna.Native
             return !e.Handled;
         }
 
-        MouseEventExtArgs GetEventArgs(CallbackData data) => MouseEventExtArgs.FromRawDataGlobal(data);
+        static MouseEventExtArgs GetEventArgs(CallbackData Data) => MouseEventExtArgs.FromRawDataGlobal(Data);
 
         void ProcessWheel(ref MouseEventExtArgs e)
         {

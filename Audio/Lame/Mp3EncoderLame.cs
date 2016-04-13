@@ -134,11 +134,7 @@ namespace Screna.Audio
         /// <summary>
         /// Releases resources.
         /// </summary>
-        public void Dispose()
-        {
-            var LameDisposable = LameFacade as IDisposable;
-            LameDisposable?.Dispose();
-        }
+        public void Dispose() => (LameFacade as IDisposable)?.Dispose();
 
         /// <summary>
         /// Encodes block of audio data.
@@ -147,33 +143,39 @@ namespace Screna.Audio
         {
             return LameFacade.Encode(source, sourceOffset, sourceCount / SampleByteSize, destination, destinationOffset);
         }
-
-        public void EnsureBufferIsSufficient(ref byte[] Buffer, int sourceCount)
+        
+        /// <summary>
+        /// Ensures that the buffer is big enough to hold the result of encoding <paramref name="SourceCount"/> bytes.
+        /// </summary>
+        public void EnsureBufferIsSufficient(ref byte[] Buffer, int SourceCount)
         {
-            var MaxLength = GetMaxEncodedLength(sourceCount);
-            if (Buffer != null && Buffer.Length >= MaxLength) return;
+            var maxLength = GetMaxEncodedLength(SourceCount);
+            if (Buffer != null && Buffer.Length >= maxLength) return;
 
-            var NewLength = Buffer?.Length * 2 ?? 1024;
-            while (NewLength < MaxLength) NewLength *= 2;
+            var newLength = Buffer?.Length * 2 ?? 1024;
+            while (newLength < maxLength) newLength *= 2;
 
-            Buffer = new byte[NewLength];
+            Buffer = new byte[newLength];
         }
 
         /// <summary>
         /// Flushes internal encoder's buffers.
         /// </summary>
-        public int Flush(byte[] destination, int destinationOffset) => LameFacade.FinishEncoding(destination, destinationOffset);
+        public int Flush(byte[] Destination, int DestinationOffset) => LameFacade.FinishEncoding(Destination, DestinationOffset);
 
         /// <summary>
         /// Gets maximum length of encoded data.
         /// </summary>
-        public int GetMaxEncodedLength(int sourceCount)
+        public int GetMaxEncodedLength(int SourceCount)
         {
             // Estimate taken from the description of 'lame_encode_buffer' method in 'lame.h'
-            var numberOfSamples = sourceCount / SampleByteSize;
+            var numberOfSamples = SourceCount / SampleByteSize;
             return (int)Math.Ceiling(1.25 * numberOfSamples + 7200);
         }
 
+        /// <summary>
+        /// Wave Format including Mp3 Specific Data.
+        /// </summary>
         public WaveFormat WaveFormat { get; }
     }
 }

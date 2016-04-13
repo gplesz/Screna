@@ -39,14 +39,14 @@ namespace Screna.Audio
         /// </summary>
         public void Dispose()
         {
-            if (audioRenderClientInterface != null)
-            {
-                // althugh GC would do this for us, we want it done now
-                // to let us reopen WASAPI
-                Marshal.ReleaseComObject(audioRenderClientInterface);
-                audioRenderClientInterface = null;
-                GC.SuppressFinalize(this);
-            }
+            if (audioRenderClientInterface == null)
+                return;
+
+            // althugh GC would do this for us, we want it done now
+            // to let us reopen WASAPI
+            Marshal.ReleaseComObject(audioRenderClientInterface);
+            audioRenderClientInterface = null;
+            GC.SuppressFinalize(this);
         }
     }
 }

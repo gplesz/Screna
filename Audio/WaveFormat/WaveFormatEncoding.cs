@@ -1,19 +1,22 @@
 namespace Screna.Audio
 {
     /// <summary>
-    /// Summary description for WaveFormatEncoding.
+    /// WaveFormat Encoding
     /// </summary>
     public enum WaveFormatEncoding : ushort
     {
+        /// <summary>
+        /// Unknown.
+        /// </summary>
         Unknown = 0x0000,
 
         /// <summary>
-        /// Pulse Code Modulation
+        /// Pulse Code Modulation.
         /// </summary>
         Pcm = 0x0001,
 
         /// <summary>
-        /// IEEE Float
+        /// IEEE Float.
         /// </summary>
         Float = 0x0003,
 
@@ -23,7 +26,7 @@ namespace Screna.Audio
         Mp3 = 0x0055,
 
         /// <summary>
-        /// Wave Format Extensible
+        /// Wave Format Extensible.
         /// </summary>
         Extensible = 0xFFFE
     }

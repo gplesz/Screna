@@ -1,9 +1,15 @@
 ﻿namespace Screna.Avi
 {
+    /// <summary>
+    /// Represents an Avi Codec.
+    /// </summary>
     public class AviCodec
     {
         internal FourCC FourCC { get; }
 
+        /// <summary>
+        /// Name of the Codec
+        /// </summary>
         public string Name { get; }
 
         internal AviCodec(FourCC FourCC, string Name)
@@ -12,6 +18,9 @@
             this.Name = Name;
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="AviCodec"/>.
+        /// </summary>
         public AviCodec(string Name)
         {
             FourCC = new FourCC("____");

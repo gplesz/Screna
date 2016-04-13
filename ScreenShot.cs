@@ -13,11 +13,24 @@ namespace Screna
     /// </summary>
     public static class ScreenShot
     {
+        /// <summary>
+        /// Captures a Specific <see cref="Screen"/>.
+        /// </summary>
+        /// <param name="Screen">The <see cref="Screen"/> to Capture.</param>
+        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
+        /// <param name="Managed">Whether to use Managed or Unmanaged Procedure.</param>
+        /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(Screen Screen, bool IncludeCursor = false, bool Managed = true)
         {
             return Capture(Screen.Bounds, IncludeCursor, Managed);
         }
-
+        
+        /// <summary>
+        /// Captures a Specific Window.
+        /// </summary>
+        /// <param name="WindowHandle">Handle of the Window to Capture</param>
+        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
+        /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(IntPtr WindowHandle, bool IncludeCursor = false)
         {
             RECT r;
@@ -50,17 +63,34 @@ namespace Screna
             return clone;
         }
 
+        /// <summary>
+        /// Captures a Specific <see cref="Form"/>.
+        /// </summary>
+        /// <param name="Form">The <see cref="Form"/> to Capture</param>
+        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
+        /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(Form Form, bool IncludeCursor = false)
         {
             return Capture(Form.Handle, IncludeCursor);
         }
 
+        /// <summary>
+        /// Captures a Specific WPF Window.
+        /// </summary>
+        /// <param name="Window">The <see cref="System.Windows.Window"/> to Capture</param>
+        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
+        /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(System.Windows.Window Window, bool IncludeCursor = false)
         {
-            var wih = new WindowInteropHelper(Window);
-            return Capture(wih.Handle, IncludeCursor);
+            return Capture(new WindowInteropHelper(Window).Handle, IncludeCursor);
         }
 
+        /// <summary>
+        /// Captures the entire Desktop.
+        /// </summary>
+        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
+        /// <param name="Managed">Whether to use Managed or Unmanaged Procedure.</param>
+        /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(bool IncludeCursor = false, bool Managed = true)
         {
             return Capture(WindowProvider.DesktopRectangle, IncludeCursor, Managed);
@@ -229,6 +259,13 @@ namespace Screna
             return bmp;
         }
 
+        /// <summary>
+        /// Captures a Specific Region.
+        /// </summary>
+        /// <param name="Region">A <see cref="Rectangle"/> specifying the Region to Capture.</param>
+        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
+        /// <param name="Managed">Whether to use Managed or Unmanaged Procedure.</param>
+        /// <returns>The Captured Image.</returns>
         public static Bitmap Capture(Rectangle Region, bool IncludeCursor = false, bool Managed = true)
         {
             return Managed ? CaptureRegionManaged(Region, IncludeCursor) : CaptureRegionUnmanaged(Region, IncludeCursor);
