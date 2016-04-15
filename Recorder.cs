@@ -50,7 +50,7 @@ namespace Screna
             else handler(E);
         }
 
-        public Recorder(IVideoFileWriter Encoder, IImageProvider ImageProvider, IAudioProvider AudioProvider = null)
+        public Recorder(IVideoFileWriter Encoder, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
         {
             // Init Fields
             _imageProvider = ImageProvider;
@@ -58,6 +58,8 @@ namespace Screna
             _audioProvider = AudioProvider;
 
             _syncContext = SynchronizationContext.Current;
+
+            Encoder.Init(ImageProvider, FrameRate, AudioProvider);
 
             // Audio Init
             if (_videoEncoder.SupportsAudio

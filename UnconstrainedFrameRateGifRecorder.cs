@@ -35,6 +35,8 @@ namespace Screna
             _imageProvider = ImageProvider;
             _videoEncoder = Encoder;
 
+            // GifWriter.Init not needed.
+
             // RecordThread Init
             if (ImageProvider != null)
                 _recordThread = new Thread(Record)
@@ -44,7 +46,7 @@ namespace Screna
                 };
 
 
-            // Not Actually Started, Waits for ContinueThread to be Set
+            // Not Actually Started, Waits for _continueCapturing to be Set
             _recordThread?.Start();
         }
 

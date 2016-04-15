@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Threading.Tasks;
+using Screna.Audio;
 
 namespace Screna
 {
@@ -9,6 +10,14 @@ namespace Screna
     /// </summary>
     public interface IVideoFileWriter : IDisposable
     {
+        /// <summary>
+        /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.
+        /// </summary>
+        /// <param name="ImageProvider">The Image Provider.</param>
+        /// <param name="FrameRate">Video Frame Rate.</param>
+        /// <param name="AudioProvider">The Audio Provider.</param>
+        void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider);
+
         /// <summary>
         /// Asynchronously writes an Image frame.
         /// </summary>
@@ -25,7 +34,7 @@ namespace Screna
         /// Video Frame Rate.
         /// </summary>
         int FrameRate { get; }
-
+        
         /// <summary>
         /// Write audio block to Audio Stream.
         /// </summary>

@@ -17,12 +17,16 @@ namespace Screna.Avi
         IAviVideoStream _videoStream;
         IAviAudioStream _audioStream;
         IAudioProvider _audioFacade;
-        readonly byte[] _videoBuffer;
+        byte[] _videoBuffer;
+        readonly string _fileName;
+        readonly int _quality;
+        readonly IAudioEncoder _audioEncoder;
+        readonly AviCodec _codec;
 
         /// <summary>
         /// Video Frame Rate.
         /// </summary>
-        public int FrameRate { get; }
+        public int FrameRate { get; private set; }
         
         /// <summary>
         /// Gets whether Audio is recorded.
@@ -31,28 +35,38 @@ namespace Screna.Avi
         #endregion
 
         public AviWriter(string FileName,
-            IImageProvider ImageProvider,
-            AviCodec Codec,
-            int Quality = 70,
-            int FrameRate = 10,
-            IAudioProvider AudioFacade = null,
-            IAudioEncoder AudioEncoder = null)
+                         AviCodec Codec,
+                         int Quality = 70,
+                         IAudioEncoder AudioEncoder = null)
+        {
+            _fileName = FileName;
+            _quality = Quality;
+            _audioEncoder = AudioEncoder;
+            _codec = Codec;
+        }
+
+        /// <summary>
+        /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.
+        /// </summary>
+        /// <param name="ImageProvider">The Image Provider.</param>
+        /// <param name="FrameRate">Video Frame Rate.</param>
+        /// <param name="AudioProvider">The Audio Provider.</param>
+        public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
         {
             this.FrameRate = FrameRate;
-            _audioFacade = AudioFacade;
+            _audioFacade = AudioProvider;
+            _videoBuffer = new byte[ImageProvider.Width * ImageProvider.Height * 4];
 
-            _writer = new AviInternalWriter(FileName)
+            _writer = new AviInternalWriter(_fileName)
             {
                 FramesPerSecond = FrameRate,
                 EmitIndex1 = true
             };
 
-            CreateVideoStream(ImageProvider.Width, ImageProvider.Height, Quality, Codec);
+            CreateVideoStream(ImageProvider.Width, ImageProvider.Height, _quality, _codec);
 
-            if (AudioFacade != null)
-                CreateAudioStream(AudioFacade, AudioEncoder);
-
-            _videoBuffer = new byte[ImageProvider.Width * ImageProvider.Height * 4];
+            if (AudioProvider != null)
+                CreateAudioStream(_audioFacade, _audioEncoder);
         }
 
         /// <summary>

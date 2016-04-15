@@ -2,6 +2,7 @@
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
+﻿using Screna.Audio;
 
 namespace Screna
 {
@@ -91,13 +92,15 @@ namespace Screna
                     Image.Save(gifStream, ImageFormat.Gif);
 
                     // Steal the global color table info
-                    if (_firstFrame) InitHeader(gifStream, _writer, Image.Width, Image.Height);
+                    if (_firstFrame)
+                        InitHeader(gifStream, _writer, Image.Width, Image.Height);
 
                     WriteGraphicControlBlock(gifStream, _writer, Delay == 0 ? DefaultFrameDelay : Delay);
                     WriteImageBlock(gifStream, _writer, !_firstFrame, 0, 0, Image.Width, Image.Height);
                 }
 
-            if (_firstFrame) _firstFrame = false;
+            if (_firstFrame)
+                _firstFrame = false;
         }
 
         /// <summary>
@@ -107,6 +110,20 @@ namespace Screna
         /// <param name="Delay">Delay in milliseconds between this frame and last frame.</param>
         /// <returns>The Task Object.</returns>
         public Task WriteFrameAsync(Bitmap Image, int Delay) => Task.Factory.StartNew(() => WriteFrame(Image, Delay));
+
+        /// <summary>
+        /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.
+        /// </summary>
+        /// <param name="ImageProvider">The Image Provider.</param>
+        /// <param name="FrameRate">Video Frame Rate.</param>
+        /// <param name="AudioProvider">The Audio Provider (not supported with GIF).</param>
+        public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
+        {
+            DefaultFrameDelay = 1000 / FrameRate;
+
+            DefaultWidth = ImageProvider.Width;
+            DefaultHeight = ImageProvider.Height;
+        }
 
         /// <summary>
         /// Asynchronously writes a Image frame.
