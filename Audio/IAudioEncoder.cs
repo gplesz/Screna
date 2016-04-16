@@ -13,6 +13,11 @@ namespace Screna.Audio
         WaveFormat WaveFormat { get; }
 
         /// <summary>
+        /// Gets if RIFF header is needed when writing to a file.
+        /// </summary>
+        bool RequiresRiffHeader { get; }
+
+        /// <summary>
         /// Gets the maximum number of bytes in encoded data for a given number of source bytes.
         /// </summary>
         /// <param name="SourceCount">Number of source bytes. Specify <c>0</c> for a flush buffer size.</param>

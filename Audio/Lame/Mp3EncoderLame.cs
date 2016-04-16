@@ -13,7 +13,11 @@ namespace Screna.Audio
     /// <remarks>
     /// Only 16-bit audio is currently supported.
     /// The class is designed for using only a single instance at a time.
-    /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/
+    /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/.
+    /// <para>
+    /// Default Name for the loaded lame dll is lameenc32.dll for 32-bit process and lameenc64.dll for 64-bit process.
+    /// Use <see cref="Load(string)"/> to load the library from a custom path.
+    /// </para>
     /// </remarks>
     public class Mp3EncoderLame : IAudioEncoder
     {
@@ -81,15 +85,9 @@ namespace Screna.Audio
 
             using (var SourceStream = ResourceAssembly.GetManifestResourceStream("Screna.Audio.Lame.LameFacadeImpl.cs"))
             using (var SourceReader = new StreamReader(SourceStream))
-            {
                 SourceCode = SourceReader.ReadToEnd();
-                SourceReader.Close();
-            }
-
-            var LameDllNameLiteral = $"\"{LameDllName}\"";
-            SourceCode = SourceCode.Replace("\"lame_enc.dll\"", LameDllNameLiteral);
-
-            return SourceCode;
+            
+            return SourceCode.Replace("\"lame_enc.dll\"", $"\"{LameDllName}\"");
         }
 
         static bool IsLibraryLoaded(string LibraryName)
@@ -162,6 +160,11 @@ namespace Screna.Audio
         /// Flushes internal encoder's buffers.
         /// </summary>
         public int Flush(byte[] Destination, int DestinationOffset) => LameFacade.FinishEncoding(Destination, DestinationOffset);
+
+        /// <summary>
+        /// Gets if RIFF header is needed when writing to a file.
+        /// </summary>
+        public bool RequiresRiffHeader => false;
 
         /// <summary>
         /// Gets maximum length of encoded data.

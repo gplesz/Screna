@@ -8,45 +8,44 @@ namespace Screna.Audio
 
     class WasapiSilenceOut
     {
-        AudioClient audioClient;
-        readonly WasapiAudioDevice mmDevice;
-        AudioRenderClient renderClient;
-        int latencyMilliseconds, bufferFrameCount, bytesPerFrame;
-        EventWaitHandle frameEventWaitHandle;
-        volatile PlaybackState playbackState;
-        Thread playThread;
-        WaveFormat outputFormat;
-        readonly SynchronizationContext syncContext;
+        AudioClient _audioClient;
+        AudioRenderClient _renderClient;
+        readonly int _latencyMilliseconds;
+        int _bufferFrameCount, _bytesPerFrame;
+        readonly EventWaitHandle _frameEventWaitHandle;
+        volatile PlaybackState _playbackState;
+        Thread _playThread;
+        readonly WaveFormat _outputFormat;
+        readonly SynchronizationContext _syncContext;
 
         public event Action<Exception> PlaybackStopped;
 
-        public WasapiSilenceOut(WasapiAudioDevice device, int latency)
+        public WasapiSilenceOut(WasapiAudioDevice Device, int Latency)
         {
-            audioClient = device.AudioClient;
-            mmDevice = device;
-            latencyMilliseconds = latency;
-            syncContext = SynchronizationContext.Current;
-            outputFormat = audioClient.MixFormat; // allow the user to query the default format for shared mode streams
+            _audioClient = Device.AudioClient;
+            _latencyMilliseconds = Latency;
+            _syncContext = SynchronizationContext.Current;
+            _outputFormat = _audioClient.MixFormat; // allow the user to query the default format for shared mode streams
 
-            long latencyRefTimes = latencyMilliseconds * 10000;
+            long latencyRefTimes = _latencyMilliseconds * 10000;
 
-            var EventCallback = 0x00040000;
+            const int eventCallback = 0x00040000;
 
             // With EventCallBack and Shared, both latencies must be set to 0 (update - not sure this is true anymore)
-            audioClient.Initialize(AudioClientShareMode.Shared, EventCallback, latencyRefTimes, 0, outputFormat, Guid.Empty);
+            _audioClient.Initialize(AudioClientShareMode.Shared, eventCallback, latencyRefTimes, 0, _outputFormat, Guid.Empty);
 
             // Windows 10 returns 0 from stream latency, resulting in maxing out CPU usage later
-            var streamLatency = audioClient.StreamLatency;
+            var streamLatency = _audioClient.StreamLatency;
             if (streamLatency != 0)
                 // Get back the effective latency from AudioClient
-                latencyMilliseconds = (int)(streamLatency / 10000);
+                _latencyMilliseconds = (int)(streamLatency / 10000);
 
             // Create the Wait Event Handle
-            frameEventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-            audioClient.SetEventHandle(frameEventWaitHandle.SafeWaitHandle.DangerousGetHandle());
+            _frameEventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            _audioClient.SetEventHandle(_frameEventWaitHandle.SafeWaitHandle.DangerousGetHandle());
 
             // Get the RenderClient
-            renderClient = audioClient.AudioRenderClient;
+            _renderClient = _audioClient.AudioRenderClient;
         }
 
         void PlayThread()
@@ -55,29 +54,29 @@ namespace Screna.Audio
             try
             {
                 // fill a whole buffer
-                bufferFrameCount = audioClient.BufferSize;
-                bytesPerFrame = outputFormat.Channels * outputFormat.BitsPerSample / 8;
-                FillBuffer(bufferFrameCount);
+                _bufferFrameCount = _audioClient.BufferSize;
+                _bytesPerFrame = _outputFormat.Channels * _outputFormat.BitsPerSample / 8;
+                FillBuffer(_bufferFrameCount);
                 
-                audioClient.Start();
+                _audioClient.Start();
 
-                while (playbackState != PlaybackState.Stopped)
+                while (_playbackState != PlaybackState.Stopped)
                 {
                     // If still playing and notification is ok
-                    if (!frameEventWaitHandle.WaitOne(3*latencyMilliseconds) || playbackState != PlaybackState.Playing)
+                    if (!_frameEventWaitHandle.WaitOne(3*_latencyMilliseconds) || _playbackState != PlaybackState.Playing)
                         continue;
 
                     // See how much buffer space is available.
-                    var numFramesAvailable = bufferFrameCount - audioClient.CurrentPadding;
+                    var numFramesAvailable = _bufferFrameCount - _audioClient.CurrentPadding;
 
                     if (numFramesAvailable > 10)
                         FillBuffer(numFramesAvailable);
                 }
 
-                Thread.Sleep(latencyMilliseconds / 2);
-                audioClient.Stop();
+                Thread.Sleep(_latencyMilliseconds / 2);
+                _audioClient.Stop();
 
-                if (playbackState == PlaybackState.Stopped) audioClient.Reset();
+                if (_playbackState == PlaybackState.Stopped) _audioClient.Reset();
             }
             catch (Exception ex) { e = ex; }
             finally
@@ -85,68 +84,68 @@ namespace Screna.Audio
                 var handler = PlaybackStopped;
                 if (handler != null)
                 {
-                    if (syncContext == null) handler(e);
-                    else syncContext.Post(state => handler(e), null);
+                    if (_syncContext == null) handler(e);
+                    else _syncContext.Post(State => handler(e), null);
                 }
             }
         }
 
-        void FillBuffer(int frameCount)
+        void FillBuffer(int FrameCount)
         {
-            var buffer = renderClient.GetBuffer(frameCount);
-            var readLength = frameCount * bytesPerFrame;
+            var buffer = _renderClient.GetBuffer(FrameCount);
+            var readLength = FrameCount * _bytesPerFrame;
 
             for (var i = 0; i < readLength; ++i)
                 Marshal.WriteByte(buffer, i, 0);
 
-            renderClient.ReleaseBuffer(frameCount);
+            _renderClient.ReleaseBuffer(FrameCount);
         }
 
         public void Play()
         {
-            switch (playbackState)
+            switch (_playbackState)
             {
                 case PlaybackState.Playing:
                     return;
 
                 case PlaybackState.Stopped:
-                    playThread = new Thread(PlayThread);
-                    playbackState = PlaybackState.Playing;
-                    playThread.Start();
+                    _playThread = new Thread(PlayThread);
+                    _playbackState = PlaybackState.Playing;
+                    _playThread.Start();
                     break;
 
                 default:
-                    playbackState = PlaybackState.Playing;
+                    _playbackState = PlaybackState.Playing;
                     break;
             }
         }
 
         public void Stop()
         {
-            if (playbackState == PlaybackState.Stopped)
+            if (_playbackState == PlaybackState.Stopped)
                 return;
 
-            playbackState = PlaybackState.Stopped;
-            playThread.Join();
-            playThread = null;
+            _playbackState = PlaybackState.Stopped;
+            _playThread.Join();
+            _playThread = null;
         }
 
         public void Pause()
         {
-            if (playbackState == PlaybackState.Playing)
-                playbackState = PlaybackState.Paused;
+            if (_playbackState == PlaybackState.Playing)
+                _playbackState = PlaybackState.Paused;
         }
 
         public void Dispose()
         {
-            if (audioClient == null)
+            if (_audioClient == null)
                 return;
 
             Stop();
 
-            audioClient.Dispose();
-            audioClient = null;
-            renderClient = null;
+            _audioClient.Dispose();
+            _audioClient = null;
+            _renderClient = null;
         }
     }
 }

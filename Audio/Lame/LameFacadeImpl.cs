@@ -142,24 +142,24 @@ namespace Screna.Audio
         static void ThrowInvalidChannelCount() { throw new InvalidOperationException("Set ChannelCount to 1 or 2"); }
 
         #region LAME DLL API
-        const string DLL_NAME = "lame_enc.dll";
+        const string DllName = "lame_enc.dll";
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern IntPtr lame_init();
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_close(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_in_samplerate(IntPtr context, int value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_in_samplerate(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_num_channels(IntPtr context, int value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_num_channels(IntPtr context);
 
         enum MpegMode : int
@@ -171,34 +171,34 @@ namespace Screna.Audio
             NotSet = 4,
         }
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_mode(IntPtr context, MpegMode value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern MpegMode lame_get_mode(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_brate(IntPtr context, int value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_brate(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_out_samplerate(IntPtr context, int value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_out_samplerate(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern void lame_set_write_id3tag_automatic(IntPtr context, bool value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern bool lame_get_write_id3tag_automatic(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_bWriteVbrTag(IntPtr context, int value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_bWriteVbrTag(IntPtr context);
 
         enum VbrMode : int
@@ -210,38 +210,38 @@ namespace Screna.Audio
             MarkTaylorRogerHegemann = 4,
         }
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_VBR(IntPtr context, VbrMode value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern VbrMode lame_get_VBR(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_set_decode_only(IntPtr context, int value);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_decode_only(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_encoder_delay(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_get_framesize(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_init_params(IntPtr context);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_encode_buffer(IntPtr context,
             IntPtr buffer_l, IntPtr buffer_r, int nsamples,
             IntPtr mp3buf, int mp3buf_size);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_encode_buffer_interleaved(IntPtr context,
             IntPtr buffer, int nsamples,
             IntPtr mp3buf, int mp3buf_size);
 
-        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_encode_flush(IntPtr context, IntPtr mp3buf, int mp3buf_size);
         #endregion
     }

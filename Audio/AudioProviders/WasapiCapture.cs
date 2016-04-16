@@ -29,7 +29,7 @@ namespace Screna.Audio
     }
 
     /// <summary>
-    /// Audio Capture using Wasapi
+    /// Audio Capture using Wasapi.
     /// </summary>
     public class WasapiCapture : IAudioProvider
     {
@@ -256,16 +256,10 @@ namespace Screna.Audio
         {
             Stop();
 
-            if (_captureThread != null)
-            {
-                _captureThread.Join();
-                _captureThread = null;
-            }
-
-            if (_audioClient == null)
-                return;
-
-            _audioClient.Dispose();
+            _captureThread?.Join();
+            _captureThread = null;
+            
+            _audioClient?.Dispose();
             _audioClient = null;
         }
 

@@ -19,7 +19,6 @@ namespace Screna.Avi
         IAudioProvider _audioFacade;
         byte[] _videoBuffer;
         readonly string _fileName;
-        readonly int _quality;
         readonly IAudioEncoder _audioEncoder;
         readonly AviCodec _codec;
 
@@ -34,13 +33,17 @@ namespace Screna.Avi
         public bool SupportsAudio => _audioStream != null;
         #endregion
 
+        /// <summary>
+        /// Creates a new instance of <see cref="AviWriter"/>.
+        /// </summary>
+        /// <param name="FileName">Output file path.</param>
+        /// <param name="Codec">The Avi Codec.</param>
+        /// <param name="AudioEncoder">The <see cref="IAudioEncoder"/> to use to encode Audio... null (default) = don't encode audio.</param>
         public AviWriter(string FileName,
                          AviCodec Codec,
-                         int Quality = 70,
                          IAudioEncoder AudioEncoder = null)
         {
             _fileName = FileName;
-            _quality = Quality;
             _audioEncoder = AudioEncoder;
             _codec = Codec;
         }
@@ -63,7 +66,7 @@ namespace Screna.Avi
                 EmitIndex1 = true
             };
 
-            CreateVideoStream(ImageProvider.Width, ImageProvider.Height, _quality, _codec);
+            CreateVideoStream(ImageProvider.Width, ImageProvider.Height, _codec);
 
             if (AudioProvider != null)
                 CreateAudioStream(_audioFacade, _audioEncoder);
@@ -84,20 +87,20 @@ namespace Screna.Avi
         }
 
         #region Private Methods
-        void CreateVideoStream(int Width, int Height, int Quality, AviCodec Codec)
+        void CreateVideoStream(int Width, int Height, AviCodec Codec)
         {
             // Select encoder type based on FOURCC of codec
             if (Codec == AviCodec.Uncompressed)
                 _videoStream = _writer.AddUncompressedVideoStream(Width, Height);
             else if (Codec == AviCodec.MotionJpeg)
-                _videoStream = _writer.AddMotionJpegVideoStream(Width, Height, Quality);
+                _videoStream = _writer.AddMotionJpegVideoStream(Width, Height, Codec.Quality);
             else
             {
                 _videoStream = _writer.AddMpeg4VideoStream(Width, Height,
                     (double)_writer.FramesPerSecond,
                     // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
                     // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
-                    Quality: Quality,
+                    Quality: Codec.Quality,
                     Codec: Codec,
                     // Most of VfW codecs expect single-threaded use, so we wrap this encoder to special wrapper
                     // Thus all calls to the encoder (including its instantiation) will be invoked on a single thread although encoding (and writing) is performed asynchronously

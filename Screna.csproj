@@ -71,6 +71,7 @@
     <Compile Include="Avi\RiffChunksFourCCs.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GifWriter.cs" />
+    <Compile Include="ImageProviders\ImageProviderBase.cs" />
     <Compile Include="ImageProviders\RegionProvider.cs" />
     <Compile Include="IVideoFileWriter.cs" />
     <Compile Include="Avi\AviWriter.cs" />

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Screna.Audio
 {
@@ -14,12 +15,19 @@ namespace Screna.Audio
         byte[] _encodedBuffer;
 
         /// <summary>
-        /// Creates a new <see cref="EncodedAudioFileWriter"/>.
+        /// Creates a new instance of <see cref="EncodedAudioFileWriter"/>.
         /// </summary>
         /// <param name="OutStream">The <see cref="Stream"/> to write to.</param>
         /// <param name="Encoder">The <see cref="IAudioEncoder"/> to use to encode the audio.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="OutStream"/> or <paramref name="Encoder"/> is <see langword="null"/>.</exception>
         public EncodedAudioFileWriter(Stream OutStream, IAudioEncoder Encoder)
         {
+            if (OutStream == null)
+                throw new ArgumentNullException(nameof(OutStream));
+
+            if (Encoder == null)
+                throw new ArgumentNullException(nameof(Encoder));
+
             _writer = new BinaryWriter(OutStream);
 
             _encoder = Encoder;

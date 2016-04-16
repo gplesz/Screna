@@ -10,7 +10,7 @@ namespace Screna
     /// Captures the specified window which can change dynamically. 
     /// The captured image is of the size of the whole desktop to accomodate any change in the Window.
     /// </summary>
-    public class WindowProvider : IImageProvider
+    public class WindowProvider : ImageProviderBase
     {
         /// <summary>
         /// Height of the Desktop.
@@ -52,71 +52,52 @@ namespace Screna
 
         readonly Func<IntPtr> _hWnd;
         readonly Color _backgroundColor;
-        readonly IOverlay[] _overlays;
 
         public WindowProvider(IntPtr hWnd = default(IntPtr), Color BackgroundColor = default(Color), params IOverlay[] Overlays)
             : this(() => hWnd, BackgroundColor, Overlays) { }
 
         public WindowProvider(Func<IntPtr> hWnd, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
+            : base(Overlays)
         {
             _hWnd = hWnd;
-            _overlays = Overlays;
             _backgroundColor = BackgroundColor;
         }
 
         /// <summary>
         /// Capture Image.
         /// </summary>
-        public Bitmap Capture()
+        protected override void OnCapture(Graphics g)
         {
             var windowHandle = _hWnd();
 
             var rect = DesktopRectangle;
 
-            if (windowHandle != DesktopHandle && windowHandle != IntPtr.Zero)
+            if (windowHandle != DesktopHandle
+                && windowHandle != IntPtr.Zero)
             {
                 RECT r;
 
                 if (User32.GetWindowRect(windowHandle, out r))
                     rect = r.ToRectangle();
             }
+            
+            if (_backgroundColor != Color.Transparent)
+                g.FillRectangle(new SolidBrush(_backgroundColor), DesktopRectangle);
 
-            var bmp = new Bitmap(DesktopWidth, DesktopHeight);
-
-            using (var g = Graphics.FromImage(bmp))
-            {
-                if (_backgroundColor != Color.Transparent)
-                    g.FillRectangle(new SolidBrush(_backgroundColor), DesktopRectangle);
-
-                g.CopyFromScreen(rect.Location, 
-                                 rect.Location,
-                                 rect.Size,
-                                 CopyPixelOperation.SourceCopy);
-
-                foreach (var overlay in _overlays)
-                    overlay.Draw(g);
-            }
-
-            return bmp;
+            g.CopyFromScreen(rect.Location, 
+                             rect.Location,
+                             rect.Size,
+                             CopyPixelOperation.SourceCopy);
         }
 
         /// <summary>
         /// Gets the Height of Captured Image = Height of Desktop
         /// </summary>
-        public int Height => DesktopHeight;
+        public override int Height => DesktopHeight;
 
         /// <summary>
         /// Gets the Width of Captured Image = Width of Desktop
         /// </summary>
-        public int Width => DesktopWidth;
-
-        /// <summary>
-        /// Frees all resources used by this object.
-        /// </summary>
-        public void Dispose()
-        {
-            foreach (var overlay in _overlays)
-                overlay.Dispose();
-        }
+        public override int Width => DesktopWidth;
     }
 }

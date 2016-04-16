@@ -26,6 +26,11 @@
             FourCC = new FourCC("____");
             this.Name = Name;
         }
+        
+        /// <summary>
+        /// Quality of the encoded Video... 0 to 100 (default is 70) (Not supported by all Codecs). 
+        /// </summary>
+        public int Quality { get; set; } = 70;
 
         /// <summary>Identifier used for non-compressed data.</summary>
         public static readonly AviCodec Uncompressed = new AviCodec(new FourCC(0), "Uncompressed");
