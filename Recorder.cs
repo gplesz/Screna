@@ -35,7 +35,7 @@ namespace Screna
         /// <summary>
         /// Fired when Recording Stops.
         /// </summary>
-        public event Action<Exception> RecordingStopped;
+        public event EventHandler<EndEventArgs> RecordingStopped;
 
         void RaiseRecordingStopped(Exception E)
         {
@@ -45,21 +45,28 @@ namespace Screna
                 return;
 
             if (_syncContext != null)
-                _syncContext.Post(S => handler(E), null);
+                _syncContext.Post(S => handler(this, new EndEventArgs(E)), null);
 
-            else handler(E);
+            else handler(this, new EndEventArgs(E));
         }
 
-        public Recorder(IVideoFileWriter Encoder, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
+        /// <summary>
+        /// Creates a new instance of <see cref="Recorder"/>.
+        /// </summary>
+        /// <param name="Writer">Video File Writer.</param>
+        /// <param name="ImageProvider">Image Provider which provides individual frames.</param>
+        /// <param name="FrameRate">Video frame rate.</param>
+        /// <param name="AudioProvider">Audio Provider which provides audio data.</param>
+        public Recorder(IVideoFileWriter Writer, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
         {
             // Init Fields
             _imageProvider = ImageProvider;
-            _videoEncoder = Encoder;
+            _videoEncoder = Writer;
             _audioProvider = AudioProvider;
 
             _syncContext = SynchronizationContext.Current;
 
-            Encoder.Init(ImageProvider, FrameRate, AudioProvider);
+            Writer.Init(ImageProvider, FrameRate, AudioProvider);
 
             // Audio Init
             if (_videoEncoder.SupportsAudio
@@ -220,18 +227,18 @@ namespace Screna
             }
         }
 
-        void AudioDataAvailable(byte[] Buffer, int BytesRecorded)
+        void AudioDataAvailable(object sender, DataAvailableEventArgs e)
         {
             if (_audioProvider.IsSynchronizable)
             {
                 if (WaitHandle.WaitAny(new WaitHandle[] {_videoFrameWritten, _stopCapturing}) != 0)
                     return;
 
-                _videoEncoder.WriteAudio(Buffer, BytesRecorded);
+                _videoEncoder.WriteAudio(e.Buffer, e.Length);
 
                 _audioBlockWritten.Set();
             }
-            else _videoEncoder.WriteAudio(Buffer, BytesRecorded);
+            else _videoEncoder.WriteAudio(e.Buffer, e.Length);
         }
     }
 }

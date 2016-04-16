@@ -53,7 +53,7 @@ namespace Screna
         /// <summary>
         /// Fired when Recording Stops.
         /// </summary>
-        public event Action<Exception> RecordingStopped;
+        public event EventHandler<EndEventArgs> RecordingStopped;
 
         /// <summary>
         /// Start Recording.
@@ -70,7 +70,7 @@ namespace Screna
                     if (_recordThread != null)
                         _continueCapturing.Set();
                 }
-                catch (Exception E) { RecordingStopped?.Invoke(E); }
+                catch (Exception E) { RecordingStopped?.Invoke(this, new EndEventArgs(E)); }
             }).Start(Delay);
         }
 
@@ -148,10 +148,10 @@ namespace Screna
                 // Wait for the last frame is written
                 lastFrameWriteTask?.Wait();
             }
-            catch (Exception E)
+            catch (Exception e)
             {
                 Stop();
-                RecordingStopped?.Invoke(E);
+                RecordingStopped?.Invoke(this, new EndEventArgs(e));
             }
         }
     }

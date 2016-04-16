@@ -85,12 +85,12 @@ namespace Screna.Audio
         /// <summary>
         /// Indicates recorded data is available 
         /// </summary>
-        public event Action<byte[], int> DataAvailable;
+        public event EventHandler<DataAvailableEventArgs> DataAvailable;
 
         /// <summary>
         /// Indicates that all recorded data has now been received.
         /// </summary>
-        public event Action<Exception> RecordingStopped;
+        public event EventHandler<EndEventArgs> RecordingStopped;
 
         /// <summary>
         /// Creates a new instance of <see cref="WaveIn"/>.
@@ -163,7 +163,7 @@ namespace Screna.Audio
             OpenWaveInDevice();
             MmException.Try(WaveInterop.waveInStart(_waveInHandle), "waveInStart");
             _recording = true;
-            ThreadPool.QueueUserWorkItem(state => RecordThread(), null);
+            ThreadPool.QueueUserWorkItem(State => RecordThread(), null);
         }
 
         void RecordThread()
@@ -194,7 +194,7 @@ namespace Screna.Audio
 
                 foreach (var buffer in _buffers.Where(Buffer => Buffer.Done))
                 {
-                    DataAvailable?.Invoke(buffer.Data, buffer.BytesRecorded);
+                    DataAvailable?.Invoke(this, new DataAvailableEventArgs(buffer.Data, buffer.BytesRecorded));
 
                     buffer.Reuse();
                 }
@@ -209,9 +209,9 @@ namespace Screna.Audio
                 return;
 
             if (_syncContext == null)
-                handler(e);
+                handler(this, new EndEventArgs(e));
 
-            else _syncContext.Post(State => handler(e), null);
+            else _syncContext.Post(State => handler(this, new EndEventArgs(e)), null);
         }
 
         /// <summary>

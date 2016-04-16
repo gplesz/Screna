@@ -69,6 +69,8 @@
     <Compile Include="Audio\WaveFormat\WaveFormatExtensible.cs" />
     <Compile Include="Audio\AudioFileWriters\IAudioFileWriter.cs" />
     <Compile Include="Avi\RiffChunksFourCCs.cs" />
+    <Compile Include="EventArgs\DataAvailableEventArgs.cs" />
+    <Compile Include="EventArgs\EndEventArgs.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GifWriter.cs" />
     <Compile Include="ImageProviders\ImageProviderBase.cs" />

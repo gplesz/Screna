@@ -53,13 +53,25 @@ namespace Screna
         readonly Func<IntPtr> _hWnd;
         readonly Color _backgroundColor;
 
-        public WindowProvider(IntPtr hWnd = default(IntPtr), Color BackgroundColor = default(Color), params IOverlay[] Overlays)
-            : this(() => hWnd, BackgroundColor, Overlays) { }
+        /// <summary>
+        /// Creates a new instance of <see cref="WindowProvider"/>.
+        /// </summary>
+        /// <param name="Handle">Handle of the Window to Capture.</param>
+        /// <param name="BackgroundColor"><see cref="Color"/> to fill blank background.</param>
+        /// <param name="Overlays">Overlays to draw.</param>
+        public WindowProvider(IntPtr Handle = default(IntPtr), Color BackgroundColor = default(Color), params IOverlay[] Overlays)
+            : this(() => Handle, BackgroundColor, Overlays) { }
 
-        public WindowProvider(Func<IntPtr> hWnd, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
+        /// <summary>
+        /// Creates a new instance of <see cref="WindowProvider"/>.
+        /// </summary>
+        /// <param name="HandleFunc">A Function returning the Handle of the Window to Capture.</param>
+        /// <param name="BackgroundColor"><see cref="Color"/> to fill blank background.</param>
+        /// <param name="Overlays">Overlays to draw.</param>
+        public WindowProvider(Func<IntPtr> HandleFunc, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
             : base(Overlays)
         {
-            _hWnd = hWnd;
+            _hWnd = HandleFunc;
             _backgroundColor = BackgroundColor;
         }
 

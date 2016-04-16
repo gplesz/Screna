@@ -10,7 +10,7 @@ namespace Screna
         /// <summary>
         /// Fired when Recording Stops.
         /// </summary>
-        event Action<Exception> RecordingStopped;
+        event EventHandler<EndEventArgs> RecordingStopped;
 
         /// <summary>
         /// Start Recording.

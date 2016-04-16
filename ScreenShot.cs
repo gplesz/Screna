@@ -96,6 +96,11 @@ namespace Screna
             return Capture(WindowProvider.DesktopRectangle, IncludeCursor, Managed);
         }
 
+        /// <summary>
+        /// Capture transparent Screenshot of a Window.
+        /// </summary>
+        /// <param name="WindowHandle">Handle of the Window to Capture.</param>
+        /// <param name="IncludeCursor">Whether to include Mouse Cursor.</param>
         public static unsafe Bitmap CaptureTransparent(IntPtr WindowHandle, bool IncludeCursor = false)
         {
             var tmpColour = Color.White;
@@ -150,53 +155,64 @@ namespace Screna
             }
         }
 
-        public static Bitmap CaptureTransparent(IntPtr hWnd, bool IncludeCursor, bool DoResize, int ResizeWidth, int ResizeHeight)
+        /// <summary>
+        /// Capture transparent Screenshot of a Window.
+        /// </summary>
+        /// <param name="Handle">Handle of the Window to Capture.</param>
+        /// <param name="IncludeCursor">Whether to include Mouse Cursor.</param>
+        /// <param name="DoResize">
+        /// Whether to Capture at another size.
+        /// The Window is sized to the specified Resize Dimensions, Captured and resized back to original size.
+        /// </param>
+        /// <param name="ResizeWidth">Capture Width.</param>
+        /// <param name="ResizeHeight">Capture Height.</param>
+        public static Bitmap CaptureTransparent(IntPtr Handle, bool IncludeCursor, bool DoResize, int ResizeWidth, int ResizeHeight)
         {
             var startButtonHandle = User32.FindWindow("Button", "Start");
             var taskbarHandle = User32.FindWindow("Shell_TrayWnd", null);
 
-            var canResize = DoResize && User32.GetWindowLong(hWnd, GetWindowLongValue.GWL_STYLE).HasFlag(WindowStyles.WS_SIZEBOX);
+            var canResize = DoResize && User32.GetWindowLong(Handle, GetWindowLongValue.GWL_STYLE).HasFlag(WindowStyles.WS_SIZEBOX);
 
             try
             {
                 // Hide the taskbar, just incase it gets in the way
-                if (hWnd != startButtonHandle && hWnd != taskbarHandle)
+                if (Handle != startButtonHandle && Handle != taskbarHandle)
                 {
                     User32.ShowWindow(startButtonHandle, 0);
                     User32.ShowWindow(taskbarHandle, 0);
                     Application.DoEvents();
                 }
 
-                if (User32.IsIconic(hWnd))
+                if (User32.IsIconic(Handle))
                 {
-                    User32.ShowWindow(hWnd, 1);
+                    User32.ShowWindow(Handle, 1);
                     Thread.Sleep(300); // Wait for window to be restored
                 }
                 else
                 {
-                    User32.ShowWindow(hWnd, 5);
+                    User32.ShowWindow(Handle, 5);
                     Thread.Sleep(100);
                 }
 
-                User32.SetForegroundWindow(hWnd);
+                User32.SetForegroundWindow(Handle);
 
                 var r = new RECT();
 
                 if (canResize)
                 {
-                    User32.GetWindowRect(hWnd, out r);
+                    User32.GetWindowRect(Handle, out r);
 
-                    User32.SetWindowPos(hWnd, IntPtr.Zero, r.Left, r.Top, ResizeWidth, ResizeHeight, SetWindowPositionFlags.ShowWindow);
+                    User32.SetWindowPos(Handle, IntPtr.Zero, r.Left, r.Top, ResizeWidth, ResizeHeight, SetWindowPositionFlags.ShowWindow);
 
                     Thread.Sleep(100);
                 }
 
-                var s = CaptureTransparent(hWnd, IncludeCursor);
+                var s = CaptureTransparent(Handle, IncludeCursor);
 
                 var R = r.ToRectangle();
 
                 if (canResize)
-                    User32.SetWindowPos(hWnd, IntPtr.Zero,
+                    User32.SetWindowPos(Handle, IntPtr.Zero,
                         R.Left, R.Top,
                         R.Width, R.Height,
                         SetWindowPositionFlags.ShowWindow);
@@ -205,7 +221,7 @@ namespace Screna
             }
             finally
             {
-                if (hWnd != startButtonHandle && hWnd != taskbarHandle)
+                if (Handle != startButtonHandle && Handle != taskbarHandle)
                 {
                     User32.ShowWindow(startButtonHandle, 1);
                     User32.ShowWindow(taskbarHandle, 1);

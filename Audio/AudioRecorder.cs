@@ -24,8 +24,8 @@ namespace Screna.Audio
 
             _syncContext = SynchronizationContext.Current;
 
-            _audioProvider.DataAvailable += (Data, Length) => _writer.Write(Data, 0, Length);
-            _audioProvider.RecordingStopped += E =>
+            _audioProvider.DataAvailable += (s, e) => _writer.Write(e.Buffer, 0, e.Length);
+            _audioProvider.RecordingStopped += (s, e) =>
             {
                 var handler = RecordingStopped;
 
@@ -33,9 +33,9 @@ namespace Screna.Audio
                     return;
 
                 if (_syncContext != null)
-                    _syncContext.Post(S => handler(E), null);
+                    _syncContext.Post(S => handler(this, e), null);
 
-                else handler(E);
+                else handler(this, e);
             };
         }
 
@@ -79,6 +79,6 @@ namespace Screna.Audio
         /// <summary>
         /// Raised when Recording stops.
         /// </summary>
-        public event Action<Exception> RecordingStopped;
+        public event EventHandler<EndEventArgs> RecordingStopped;
     }
 }

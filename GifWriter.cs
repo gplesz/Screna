@@ -21,6 +21,12 @@ namespace Screna
         readonly object _syncLock = new object();
         #endregion
 
+        /// <summary>
+        /// Creates a new instance of GifWriter.
+        /// </summary>
+        /// <param name="OutStream">The <see cref="Stream"/> to output the Gif to.</param>
+        /// <param name="DefaultFrameDelay">Default Delay between consecutive frames... FrameRate = 1000 / DefaultFrameDelay.</param>
+        /// <param name="Repeat">No of times the Gif should repeat... -1 to repeat indefinitely.</param>
         public GifWriter(Stream OutStream, int DefaultFrameDelay = 500, int Repeat = -1)
         {
             if (OutStream == null)
@@ -37,6 +43,12 @@ namespace Screna
             this.Repeat = Repeat;
         }
 
+        /// <summary>
+        /// Creates a new instance of GifWriter.
+        /// </summary>
+        /// <param name="FileName">The path to the file to output the Gif to.</param>
+        /// <param name="DefaultFrameDelay">Default Delay between consecutive frames... FrameRate = 1000 / DefaultFrameDelay.</param>
+        /// <param name="Repeat">No of times the Gif should repeat... -1 to repeat indefinitely.</param>
         public GifWriter(string FileName, int DefaultFrameDelay = 500, int Repeat = -1)
             : this(new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read), DefaultFrameDelay, Repeat) { }
 

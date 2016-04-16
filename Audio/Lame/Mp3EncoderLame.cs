@@ -148,12 +148,15 @@ namespace Screna.Audio
         public void EnsureBufferIsSufficient(ref byte[] Buffer, int SourceCount)
         {
             var maxLength = GetMaxEncodedLength(SourceCount);
-            if (Buffer != null && Buffer.Length >= maxLength) return;
+            if (Buffer?.Length >= maxLength)
+                return;
 
             var newLength = Buffer?.Length * 2 ?? 1024;
-            while (newLength < maxLength) newLength *= 2;
 
-            Buffer = new byte[newLength];
+            while (newLength < maxLength)
+                newLength *= 2;
+
+            Array.Resize(ref Buffer, newLength);
         }
 
         /// <summary>
@@ -167,14 +170,9 @@ namespace Screna.Audio
         public bool RequiresRiffHeader => false;
 
         /// <summary>
-        /// Gets maximum length of encoded data.
+        /// Gets maximum length of encoded data. Estimate taken from the description of 'lame_encode_buffer' method in 'lame.h'
         /// </summary>
-        public int GetMaxEncodedLength(int SourceCount)
-        {
-            // Estimate taken from the description of 'lame_encode_buffer' method in 'lame.h'
-            var numberOfSamples = SourceCount / SampleByteSize;
-            return (int)Math.Ceiling(1.25 * numberOfSamples + 7200);
-        }
+        public int GetMaxEncodedLength(int SourceCount) => (int)Math.Ceiling(1.25 * SourceCount / SampleByteSize + 7200);
 
         /// <summary>
         /// Wave Format including Mp3 Specific Data.

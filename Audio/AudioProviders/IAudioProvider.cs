@@ -30,11 +30,11 @@ namespace Screna.Audio
         /// <summary>
         /// Indicates recorded data is available 
         /// </summary>
-        event Action<byte[], int> DataAvailable;
+        event EventHandler<DataAvailableEventArgs> DataAvailable;
 
         /// <summary>
         /// Indicates that all recorded data has now been received.
         /// </summary>
-        event Action<Exception> RecordingStopped;
+        event EventHandler<EndEventArgs> RecordingStopped;
     }
 }

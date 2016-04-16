@@ -48,12 +48,12 @@ namespace Screna.Audio
         /// <summary>
         /// Indicates recorded data is available 
         /// </summary>
-        public event Action<byte[], int> DataAvailable;
+        public event EventHandler<DataAvailableEventArgs> DataAvailable;
 
         /// <summary>
         /// Indicates that all recorded data has now been received.
         /// </summary>
-        public event Action<Exception> RecordingStopped;
+        public event EventHandler<EndEventArgs> RecordingStopped;
 
         /// <summary>
         /// Creates a new instances of <see cref="WasapiCapture"/> class using <see cref="DefaultDevice"/>.
@@ -209,9 +209,9 @@ namespace Screna.Audio
                 return;
 
             if (_syncContext == null)
-                handler(e);
+                handler(this, new EndEventArgs(e));
 
-            else _syncContext.Post(State => handler(e), null);
+            else _syncContext.Post(State => handler(this, new EndEventArgs(e)), null);
         }
 
         void ReadNextPacket(AudioCaptureClient Capture)
@@ -230,7 +230,7 @@ namespace Screna.Audio
                 var spaceRemaining = Math.Max(0, _recordBuffer.Length - recordBufferOffset);
                 if (spaceRemaining < bytesAvailable && recordBufferOffset > 0)
                 {
-                    DataAvailable?.Invoke(_recordBuffer, recordBufferOffset);
+                    DataAvailable?.Invoke(this, new DataAvailableEventArgs(_recordBuffer, recordBufferOffset));
                     recordBufferOffset = 0;
                 }
 
@@ -246,7 +246,7 @@ namespace Screna.Audio
                 packetSize = Capture.GetNextPacketSize();
             }
 
-            DataAvailable?.Invoke(_recordBuffer, recordBufferOffset);
+            DataAvailable?.Invoke(this, new DataAvailableEventArgs(_recordBuffer, recordBufferOffset));
         }
 
         /// <summary>
