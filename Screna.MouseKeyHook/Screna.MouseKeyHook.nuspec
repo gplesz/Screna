@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>Screna.MouseKeyHook</id>
+        <version>0.1.0</version>
+        <authors>MathewSachin</authors>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+Mouse Cursor and Keystroke Overlays for Screna.
+
+Install the Screna package first.
+Source code is added to the current project in Screna\MouseKeyHook folder.
+Also, the MouseKeyHook package is installed.
+        </description>
+        <summary>Mouse Cursor and Keystroke Overlays for Screna.</summary>
+        <copyright>(c) 2016 Mathew Sachin</copyright>
+    </metadata>
+    <files>
+        <file src="MouseKeyHook.cs" target="content\Screna\MouseKeyHook"/>
+        <file src="install.ps1" target="tools"/>
+    </files>
+</package>

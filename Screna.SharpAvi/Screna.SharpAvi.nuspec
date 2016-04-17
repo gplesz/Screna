@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>Screna.SharpAvi</id>
+        <version>0.1.1</version>
+        <authors>MathewSachin</authors>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+Avi support for Screna using SharpAvi.
+
+Install the Screna package first.
+Source code is added to the current project in Screna\SharpAvi folder.
+Also, the SharpAvi package is installed.
+        </description>
+        <summary>Avi support for Screna using SharpAvi.</summary>
+        <copyright>(c) 2016 Mathew Sachin</copyright>
+    </metadata>
+    <files>
+        <file src="AviCodec.cs" target="content\Screna\SharpAvi"/>
+        <file src="AviWriter.cs" target="content\Screna\SharpAvi"/>
+        <file src="IAudioEncoderWrapper.cs" target="content\Screna\SharpAvi"/>
+        <file src="IAudioProviderWrapper.cs" target="content\Screna\SharpAvi"/>
+        <file src="install.ps1" target="tools"/>
+    </files>
+</package>

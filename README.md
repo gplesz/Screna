@@ -5,9 +5,25 @@
 
 Screna provides a highly extensible API to develop Capturing Apps.
 
-> [Captura](https://github.com/MathewSachin/Captura) is a Capture application demonstrating all the features of Screna.
+# News
+* Screna is now composed of a collection of packages, instead of a single one.  
+  Main reasons behind this were licensing issues and the mess involved in copying code from other projects into Screna.
+  
+* Added a BASS audio library extension for Screna.
+  
+Package             | Feature
+--------------------|--------------------------------------------
+Screna.Lame         | Supports LAME Mp3 Encoder
+Screna.MouseKeyHook | Provides Mouse Click and Keystroke Overlays using [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze
+Screna.Bass         | Audio Support using BASS audio library
+Screna.SharpAvi     | Avi support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov
 
-# Acknowledgements
-* Screna.Audio is derived from [NAudio](https://github.com/NAudio/NAudio) by Mark Heath licensed under Microsoft Public License.
-* Screna.Avi is derived from [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov licensed under the MIT License.
-* Screna.MouseKeyHooking is derived from [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze.
+
+# Getting Started
+
+Install the Package from NuGet.
+```powershell
+Install-Package Screna
+```
+
+> [Captura](https://github.com/MathewSachin/Captura) is a Capture application demonstrating all the features of Screna.
