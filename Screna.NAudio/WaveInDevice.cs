@@ -27,5 +27,7 @@ namespace Screna.NAudio
         } 
 
         public static WaveInDevice DefaultDevice => new WaveInDevice(0);
+        
+        public override string ToString() => Name;
     }
 }
