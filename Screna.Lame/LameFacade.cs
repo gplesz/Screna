@@ -86,7 +86,7 @@ namespace Screna.Lame
                     "lException(string.Format(\"{0} failed\", routineName));\r\n        }\r\n\r\n        stat" +
                     "ic void ThrowInvalidChannelCount() { throw new InvalidOperationException(\"Set Ch" +
                     "annelCount to 1 or 2\"); }\r\n\r\n        #region LAME DLL API\r\n        const string " +
-                    "DllName = \"lame_enc");
+                    "DllName = \"lameenc");
             
             #line 145 "C:\Users\Mathe_000\Documents\GitHub\Screna\Screna.Lame\LameFacade.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Environment.Is64BitProcess ? 64 : 32));
