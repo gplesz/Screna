@@ -142,7 +142,7 @@ namespace Screna.Lame
         static void ThrowInvalidChannelCount() { throw new InvalidOperationException("Set ChannelCount to 1 or 2"); }
 
         #region LAME DLL API
-        const string DllName = "lame_enc.dll";
+        const string DllName = "lame_enc<#= Environment.Is64BitProcess ? 64 : 32 #>.dll";
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern IntPtr lame_init();
@@ -232,14 +232,10 @@ namespace Screna.Lame
         static extern int lame_init_params(IntPtr context);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern int lame_encode_buffer(IntPtr context,
-            IntPtr buffer_l, IntPtr buffer_r, int nsamples,
-            IntPtr mp3buf, int mp3buf_size);
+        static extern int lame_encode_buffer(IntPtr context, IntPtr buffer_l, IntPtr buffer_r, int nsamples, IntPtr mp3buf, int mp3buf_size);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern int lame_encode_buffer_interleaved(IntPtr context,
-            IntPtr buffer, int nsamples,
-            IntPtr mp3buf, int mp3buf_size);
+        static extern int lame_encode_buffer_interleaved(IntPtr context, IntPtr buffer, int nsamples, IntPtr mp3buf, int mp3buf_size);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern int lame_encode_flush(IntPtr context, IntPtr mp3buf, int mp3buf_size);

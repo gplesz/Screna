@@ -31,7 +31,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="LameFacadeImpl.cs" />
+    <Compile Include="LameFacade.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LameFacade.tt</DependentUpon>
+    </Compile>
     <Compile Include="Mp3EncoderLame.cs" />
     <Compile Include="Mp3WaveFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -41,6 +45,15 @@
       <Project>{23cb9adb-ba9f-4618-bd0c-589a00a532e5}</Project>
       <Name>Screna</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="LameFacade.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>LameFacade.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

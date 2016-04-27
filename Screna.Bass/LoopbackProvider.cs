@@ -76,6 +76,8 @@ namespace Screna.Bass
             BassWasapi.CurrentDevice = _deviceIndex;
 
             BassWasapi.Stop();
+
+            RecordingStopped?.Invoke(this, new EndEventArgs(null));
         }
     }
 }

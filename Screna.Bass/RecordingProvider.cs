@@ -38,6 +38,8 @@ namespace Screna.Bass
 
             Handle = IsSynchronizable ? BASS.RecordStart(Wf.SampleRate, Wf.Channels, flags, BASS.RecordingBufferLength / 3, _proc, IntPtr.Zero)
                                       : BASS.RecordStart(Wf.SampleRate, Wf.Channels, flags, _proc);
+
+            BASS.ChannelSetSync(Handle, SyncFlags.Free, 0, (H, C, D, U) => RecordingStopped?.Invoke(this, new EndEventArgs(null)));
         }
 
         protected int Handle;
