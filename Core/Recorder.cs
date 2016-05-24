@@ -12,13 +12,13 @@ namespace Screna
     public class Recorder : IRecorder
     {
         #region Fields
-        IAudioProvider _audioProvider;
-        IVideoFileWriter _videoEncoder;
-        IImageProvider _imageProvider;
+        readonly IAudioProvider _audioProvider;
+        readonly IVideoFileWriter _videoEncoder;
+        readonly IImageProvider _imageProvider;
 
         Thread _recordThread;
 
-        ManualResetEvent _stopCapturing = new ManualResetEvent(false),
+        readonly ManualResetEvent _stopCapturing = new ManualResetEvent(false),
             _continueCapturing = new ManualResetEvent(false);
 
         readonly AutoResetEvent _videoFrameWritten = new AutoResetEvent(false),
@@ -27,11 +27,6 @@ namespace Screna
         readonly SynchronizationContext _syncContext;
         #endregion
         
-        /// <summary>
-        /// Stops the Recorder.
-        /// </summary>
-        ~Recorder() { Stop(); }
-
         /// <summary>
         /// Fired when Recording Stops.
         /// </summary>

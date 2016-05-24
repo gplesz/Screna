@@ -33,11 +33,6 @@ namespace Screna.Lame
         #region Constructors
         static Mp3EncoderLame()
         {
-            var lameDllPath = Path.Combine(Environment.CurrentDirectory, $"lameenc{(Environment.Is64BitProcess ? 64 : 32)}.dll");
-            
-            if (!File.Exists(lameDllPath))
-                throw new FileNotFoundException($"{lameDllPath} could not be found.");
-
             var csCompiler = new Microsoft.CSharp.CSharpCodeProvider();
 
             var compilerOptions = new System.CodeDom.Compiler.CompilerParameters
