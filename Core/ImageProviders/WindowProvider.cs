@@ -33,6 +33,11 @@ namespace Screna
         public static readonly IntPtr DesktopHandle = User32.GetDesktopWindow();
 
         /// <summary>
+        /// Gets the Foreground Window Handle.
+        /// </summary>
+        public static IntPtr ForegroundWindowHandle => User32.GetForegroundWindow();
+
+        /// <summary>
         /// Taskbar Handle: Shell_TrayWnd.
         /// </summary>
         public static readonly IntPtr TaskbarHandle = User32.FindWindow("Shell_TrayWnd", null);
@@ -103,12 +108,12 @@ namespace Screna
         }
 
         /// <summary>
-        /// Gets the Height of Captured Image = Height of Desktop
+        /// Gets the Height of Captured Image = Height of Desktop.
         /// </summary>
         public override int Height => DesktopHeight;
 
         /// <summary>
-        /// Gets the Width of Captured Image = Width of Desktop
+        /// Gets the Width of Captured Image = Width of Desktop.
         /// </summary>
         public override int Width => DesktopWidth;
     }

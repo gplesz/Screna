@@ -6,7 +6,9 @@
         <authors>MathewSachin</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>
-Avi support for Screna using SharpAvi.
+Avi and Lame (Mp3 encoding) support for Screna using SharpAvi.
+
+Download the LAME binaries from lame.sourceforge.net and name as lameenc32.dll and lameenc64.dll.
 
 Install the Screna package first.
 Source code is added to the current project in Screna\SharpAvi folder.
@@ -20,6 +22,8 @@ Also, the SharpAvi package is installed.
         <file src="AviWriter.cs" target="content\Screna\SharpAvi"/>
         <file src="IAudioEncoderWrapper.cs" target="content\Screna\SharpAvi"/>
         <file src="IAudioProviderWrapper.cs" target="content\Screna\SharpAvi"/>
-        <file src="install.ps1" target="tools"/>
-    </files>
+    </files>    
+    <dependencies>
+        <dependency id="SharpAvi" version="2.1.0" />
+    </dependencies>
 </package>

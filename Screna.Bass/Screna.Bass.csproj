@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ManagedBass, Version=0.20.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ManagedBass.0.20.0\lib\ManagedBass.dll</HintPath>
+    <Reference Include="ManagedBass, Version=0.22.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ManagedBass.0.22.0\lib\net45\ManagedBass.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

@@ -17,6 +17,8 @@ Also, the MouseKeyHook package is installed.
     </metadata>
     <files>
         <file src="MouseKeyHook.cs" target="content\Screna\MouseKeyHook"/>
-        <file src="install.ps1" target="tools"/>
     </files>
+    <dependencies>
+        <dependency id="MouseKeyHook" version="5.4.0" />
+    </dependencies>
 </package>

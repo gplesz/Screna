@@ -6,6 +6,8 @@
 Screna provides a highly extensible API to develop Capturing Apps.
 
 # News
+* Merged Screna.Lame into Screna.SharpAvi.
+
 * Screna is now composed of a collection of packages, instead of a single one.  
   Main reasons behind this were licensing issues and the mess involved in copying code from other projects into Screna.
   
@@ -13,10 +15,10 @@ Screna provides a highly extensible API to develop Capturing Apps.
   
 Package             | Feature
 --------------------|--------------------------------------------
-Screna.Lame         | Supports LAME Mp3 Encoder
-Screna.MouseKeyHook | Provides Mouse Click and Keystroke Overlays using [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze
-Screna.Bass         | Audio Support using BASS audio library
-Screna.SharpAvi     | Avi support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov
+Screna.NAudio       | Audio Recording and Loopback support using [NAudio](https://github.com/NAudio/NAudio) by Mark Heath.
+Screna.MouseKeyHook | Mouse Click and Keystroke Overlays using [MouseKeyHook](https://github.com/gmamaladze/globalmousekeyhook) by George Mamaladze.
+Screna.Bass         | Audio Recording and Loopback support using ManagedBass wrapper over un4seen BASS audio library.
+Screna.SharpAvi     | Avi and Lame (Mp3 Encoding) support using [SharpAvi](https://github.com/baSSiLL/SharpAvi) by Vasilli Massilov.
 
 
 # Getting Started

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Screna.Audio;
+using SharpAviLame = SharpAvi.Codecs.Mp3AudioEncoderLame;
 
 namespace Screna.Lame
 {
@@ -20,38 +21,14 @@ namespace Screna.Lame
         /// <remarks>
         /// Currently supported are 64, 96, 128, 160, 192 and 320 kbps.
         /// </remarks>
-        public static int[] SupportedBitRates { get; } = { 64, 96, 128, 160, 192, 320 };
+        public static int[] SupportedBitRates => SharpAviLame.SupportedBitRates;
 
-        #region Fields
-        const int SampleByteSize = 2;
-
-        readonly dynamic _lameFacade;
-
-        static readonly Type LameFacadeType;
-        #endregion
-
+        readonly SharpAviLame _sharpAviLame;
+        
         #region Constructors
         static Mp3EncoderLame()
         {
-            var csCompiler = new Microsoft.CSharp.CSharpCodeProvider();
-
-            var compilerOptions = new System.CodeDom.Compiler.CompilerParameters
-            {
-                GenerateInMemory = true,
-                GenerateExecutable = false,
-                IncludeDebugInformation = false,
-                CompilerOptions = "/optimize",
-                ReferencedAssemblies = { "mscorlib.dll" }
-            };
-
-            var sourceCode = new LameFacade().TransformText();
-            var compilerResult = csCompiler.CompileAssemblyFromSource(compilerOptions, sourceCode);
-
-            if (compilerResult.Errors.HasErrors)
-                throw new Exception("Could not generate LAME facade assembly.");
-
-            var facadeAssembly = compilerResult.CompiledAssembly;
-            LameFacadeType = facadeAssembly.GetType(typeof(Mp3EncoderLame).Namespace + ".LameFacadeImpl");
+            SharpAviLame.SetLameDllLocation(Path.Combine(typeof(Mp3EncoderLame).Assembly.Location, $"lameenc{(Environment.Is64BitProcess ? 64 : 32)}.dll"));
         }
 
         /// <summary>
@@ -66,28 +43,26 @@ namespace Screna.Lame
         /// </remarks>
         public Mp3EncoderLame(int ChannelCount = 1, int SampleRate = 44100, int OutputBitRateKbps = 160)
         {
-            _lameFacade = Activator.CreateInstance(LameFacadeType);
-            _lameFacade.ChannelCount = ChannelCount;
-            _lameFacade.InputSampleRate = SampleRate;
-            _lameFacade.OutputBitRate = OutputBitRateKbps;
-
-            _lameFacade.PrepareEncoding();
-
-            WaveFormat = new Mp3WaveFormat(SampleRate, ChannelCount, _lameFacade.FrameSize, EncoderDelay: _lameFacade.EncoderDelay);
+            _sharpAviLame = new SharpAviLame(ChannelCount, SampleRate, OutputBitRateKbps);
+            
+            WaveFormat = new WaveFormatExtra(SampleRate, 16, ChannelCount, _sharpAviLame.FormatSpecificData)
+            {
+                Encoding = WaveFormatEncoding.Mp3
+            };
         }
         #endregion
 
         /// <summary>
         /// Releases resources.
         /// </summary>
-        public void Dispose() => _lameFacade?.Dispose();
+        public void Dispose() => _sharpAviLame?.Dispose();
 
         /// <summary>
         /// Encodes block of audio data.
         /// </summary>
         public int Encode(byte[] Source, int SourceOffset, int SourceCount, byte[] Destination, int DestinationOffset)
         {
-            return _lameFacade.Encode(Source, SourceOffset, SourceCount / SampleByteSize, Destination, DestinationOffset);
+            return _sharpAviLame.EncodeBlock(Source, SourceOffset, SourceCount, Destination, DestinationOffset);
         }
         
         /// <summary>
@@ -110,7 +85,7 @@ namespace Screna.Lame
         /// <summary>
         /// Flushes internal encoder's buffers.
         /// </summary>
-        public int Flush(byte[] Destination, int DestinationOffset) => _lameFacade.FinishEncoding(Destination, DestinationOffset);
+        public int Flush(byte[] Destination, int DestinationOffset) => _sharpAviLame.Flush(Destination, DestinationOffset);
 
         /// <summary>
         /// Gets if RIFF header is needed when writing to a file.
@@ -120,7 +95,7 @@ namespace Screna.Lame
         /// <summary>
         /// Gets maximum length of encoded data. Estimate taken from the description of 'lame_encode_buffer' method in 'lame.h'
         /// </summary>
-        public int GetMaxEncodedLength(int SourceCount) => (int)Math.Ceiling(1.25 * SourceCount / SampleByteSize + 7200);
+        public int GetMaxEncodedLength(int SourceCount) => _sharpAviLame.GetMaxEncodedLength(SourceCount);
 
         /// <summary>
         /// Wave Format including Mp3 Specific Data.

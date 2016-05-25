@@ -2,6 +2,7 @@ using NAudio.Wave;
 
 namespace Screna.NAudio
 {
+    // TODO: In future, use NAudio's implementation.
     class SilenceProvider : IWaveProvider
     {
         public WaveFormat WaveFormat => new WaveFormat();

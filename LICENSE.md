@@ -1,8 +1,6 @@
 ﻿Copyright (c) Mathew Sachin.  
 
-The MIT License  
-> This License may not apply to NAudio, SharpAvi, MouseKeyHook.
-See Respective folders for more information
+The MIT License
 
 Permission is hereby granted, free of charge,
  to any person obtaining a copy of this software and associated documentation files (the "Software"),

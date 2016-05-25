@@ -13,9 +13,14 @@ namespace Screna
         event EventHandler<EndEventArgs> RecordingStopped;
 
         /// <summary>
+        /// Gets the State of the Recorder.
+        /// </summary>
+        RecorderState State { get; }
+
+        /// <summary>
         /// Start Recording.
         /// </summary>
-        /// <param name="Delay">Delay before recording starts.</param>
+        /// <param name="Delay">Delay (in milliseconds) before recording starts... 0 (Default) = Start immediately.</param>
         void Start(int Delay = 0);
 
         /// <summary>

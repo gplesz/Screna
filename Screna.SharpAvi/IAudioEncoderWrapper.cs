@@ -4,6 +4,9 @@ using ScrenaAudioEncoder = Screna.Audio.IAudioEncoder;
 
 namespace Screna.Avi
 {
+    /// <summary>
+    /// Enables a Screna based Audio Encoder to be used with SharpAvi.
+    /// </summary>
     class IAudioEncoderWrapper : IAudioEncoder
     {
         readonly ScrenaAudioEncoder _encoder;

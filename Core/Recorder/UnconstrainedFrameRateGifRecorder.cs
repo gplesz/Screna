@@ -7,7 +7,7 @@ namespace Screna
     /// <summary>
     /// An <see cref="IRecorder"/> which records to a Gif using Delay for each frame instead of Frame Rate.
     /// </summary>
-    public class UnconstrainedFrameRateGifRecorder : IRecorder
+    public class UnconstrainedFrameRateGifRecorder : RecorderBase
     {
         #region Fields
         GifWriter _videoEncoder;
@@ -18,11 +18,6 @@ namespace Screna
         ManualResetEvent _stopCapturing = new ManualResetEvent(false),
             _continueCapturing = new ManualResetEvent(false);
         #endregion
-        
-        /// <summary>
-        /// Stops Recording.
-        /// </summary>
-        ~UnconstrainedFrameRateGifRecorder() { Stop(); }
 
         /// <summary>
         /// Creates a new instance of <see cref="UnconstrainedFrameRateGifRecorder"/>.
@@ -31,19 +26,21 @@ namespace Screna
         /// <param name="ImageProvider">The <see cref="IImageProvider"/> providing the individual frames.</param>
         public UnconstrainedFrameRateGifRecorder(GifWriter Encoder, IImageProvider ImageProvider)
         {
+            if (ImageProvider == null)
+                throw new ArgumentNullException(nameof(ImageProvider));
+
             // Init Fields
             _imageProvider = ImageProvider;
             _videoEncoder = Encoder;
-
+            
             // GifWriter.Init not needed.
 
             // RecordThread Init
-            if (ImageProvider != null)
-                _recordThread = new Thread(Record)
-                {
-                    Name = "Captura.Record",
-                    IsBackground = true
-                };
+            _recordThread = new Thread(Record)
+            {
+                Name = "Captura.Record",
+                IsBackground = true
+            };
 
 
             // Not Actually Started, Waits for _continueCapturing to be Set
@@ -51,33 +48,14 @@ namespace Screna
         }
 
         /// <summary>
-        /// Fired when Recording Stops.
+        /// Override this method with the code to start recording.
         /// </summary>
-        public event EventHandler<EndEventArgs> RecordingStopped;
+        protected override void OnStart() => _continueCapturing.Set();
 
         /// <summary>
-        /// Start Recording.
+        /// Override this method with the code to stop recording.
         /// </summary>
-        /// <param name="Delay">Delay before recording starts.</param>
-        public void Start(int Delay = 0)
-        {
-            new Thread(e =>
-            {
-                try
-                {
-                    Thread.Sleep((int)e);
-
-                    if (_recordThread != null)
-                        _continueCapturing.Set();
-                }
-                catch (Exception E) { RecordingStopped?.Invoke(this, new EndEventArgs(E)); }
-            }).Start(Delay);
-        }
-
-        /// <summary>
-        /// Stop Recording and Perform Cleanup.
-        /// </summary>
-        public void Stop()
+        protected override void OnStop()
         {
             // Resume if Paused
             _continueCapturing?.Set();
@@ -122,9 +100,9 @@ namespace Screna
         }
 
         /// <summary>
-        /// Pause Recording.
+        /// Override this method with the code to pause recording.
         /// </summary>
-        public void Pause() { if (_recordThread != null) _continueCapturing.Reset(); }
+        protected override void OnPause() => _continueCapturing.Reset();
 
         void Record()
         {
@@ -151,7 +129,7 @@ namespace Screna
             catch (Exception e)
             {
                 Stop();
-                RecordingStopped?.Invoke(this, new EndEventArgs(e));
+                RaiseRecordingStopped(e);
             }
         }
     }

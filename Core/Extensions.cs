@@ -1,5 +1,4 @@
 ﻿using Screna.Native;
-using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -239,88 +238,5 @@ namespace Screna
         }
 
         static byte ToByte(int i) => (byte)(i > 255 ? 255 : (i < 0 ? 0 : i));
-
-        internal static unsafe void Bgr32ToBgr24(byte[] source, int srcOffset, byte[] destination, int destOffset, int pixelCount)
-        {
-            fixed (byte* sourcePtr = source, destinationPtr = destination)
-            {
-                var sourceStart = sourcePtr + srcOffset;
-                var destinationStart = destinationPtr + destOffset;
-                var sourceEnd = sourceStart + 4 * pixelCount;
-
-                var src = sourceStart;
-                var dest = destinationStart;
-
-                while (src < sourceEnd)
-                {
-                    *dest++ = *src++;
-                    *dest++ = *src++;
-                    *dest++ = *src++;
-                    src++;
-                }
-            }
-        }
-
-        internal static void FlipVertical(byte[] source, int srcOffset, byte[] destination, int destOffset, int height, int stride)
-        {
-            var src = srcOffset;
-            var dest = destOffset + (height - 1) * stride;
-
-            for (var y = 0; y < height; y++)
-            {
-                Buffer.BlockCopy(source, src, destination, dest, stride);
-                src += stride;
-                dest -= stride;
-            }
-        }
-
-        /// <summary>
-        /// Splits frame rate value to integer <c>rate</c> and <c>scale</c> values used in some AVI headers
-        /// and VfW APIs.
-        /// </summary>
-        /// <param name="frameRate">
-        /// Frame rate. Rounded to 3 fractional digits.
-        /// </param>
-        /// <param name="rate">
-        /// When the method returns, contains rate value.
-        /// </param>
-        /// <param name="scale">
-        /// When the method returns, contains scale value.
-        /// </param>
-        internal static void SplitFrameRate(decimal frameRate, out uint rate, out uint scale)
-        {
-            if (decimal.Round(frameRate) == frameRate)
-            {
-                rate = (uint)decimal.Truncate(frameRate);
-                scale = 1;
-            }
-            else if (decimal.Round(frameRate, 1) == frameRate)
-            {
-                rate = (uint)decimal.Truncate(frameRate * 10m);
-                scale = 10;
-            }
-            else if (decimal.Round(frameRate, 2) == frameRate)
-            {
-                rate = (uint)decimal.Truncate(frameRate * 100m);
-                scale = 100;
-            }
-            else
-            {
-                rate = (uint)decimal.Truncate(frameRate * 1000m);
-                scale = 1000;
-            }
-
-            // Make mutually prime (needed for some hardware players)
-            while (rate % 2 == 0 && scale % 2 == 0)
-            {
-                rate /= 2;
-                scale /= 2;
-            }
-            while (rate % 5 == 0 && scale % 5 == 0)
-            {
-                rate /= 5;
-                scale /= 5;
-            }
-        }
     }
 }

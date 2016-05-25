@@ -42,6 +42,7 @@
     <Compile Include="AviWriter.cs" />
     <Compile Include="IAudioProviderWrapper.cs" />
     <Compile Include="IAudioEncoderWrapper.cs" />
+    <Compile Include="Mp3EncoderLame.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

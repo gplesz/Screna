@@ -20,6 +20,8 @@ Also, the NAudio package is installed.
         <file src="SilenceProvider.cs" target="content\Screna\NAudio"/>
         <file src="WaveInProvider.cs" target="content\Screna\NAudio"/>
         <file src="WaveInDevice.cs" target="content\Screna\NAudio"/>
-        <file src="install.ps1" target="tools"/>
     </files>
+    <dependencies>
+        <dependency id="NAudio" version="1.7.3" />
+    </dependencies>
 </package>

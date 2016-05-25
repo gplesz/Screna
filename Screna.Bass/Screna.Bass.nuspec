@@ -20,6 +20,8 @@ bass.dll x86/x64 needs to be downloaded from http://un4seen.com
     <files>
         <file src="LoopbackProvider.cs" target="content\Screna\Bass"/>
         <file src="RecordingProvider.cs" target="content\Screna\Bass"/>
-        <file src="install.ps1" target="tools"/>
     </files>
+    <dependencies>
+        <dependency id="ManagedBass" version="0.21.0" />
+    </dependencies>
 </package>

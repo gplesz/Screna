@@ -9,7 +9,7 @@ namespace Screna
     /// <summary>
     /// Primary implementation of the <see cref="IRecorder"/> interface.
     /// </summary>
-    public class Recorder : IRecorder
+    public class Recorder : RecorderBase
     {
         #region Fields
         readonly IAudioProvider _audioProvider;
@@ -23,28 +23,8 @@ namespace Screna
 
         readonly AutoResetEvent _videoFrameWritten = new AutoResetEvent(false),
             _audioBlockWritten = new AutoResetEvent(false);
-
-        readonly SynchronizationContext _syncContext;
         #endregion
         
-        /// <summary>
-        /// Fired when Recording Stops.
-        /// </summary>
-        public event EventHandler<EndEventArgs> RecordingStopped;
-
-        void RaiseRecordingStopped(Exception E)
-        {
-            var handler = RecordingStopped;
-
-            if (handler == null)
-                return;
-
-            if (_syncContext != null)
-                _syncContext.Post(S => handler(this, new EndEventArgs(E)), null);
-
-            else handler(this, new EndEventArgs(E));
-        }
-
         /// <summary>
         /// Creates a new instance of <see cref="Recorder"/>.
         /// </summary>
@@ -58,9 +38,7 @@ namespace Screna
             _imageProvider = ImageProvider;
             _videoEncoder = Writer;
             _audioProvider = AudioProvider;
-
-            _syncContext = SynchronizationContext.Current;
-
+            
             Writer.Init(ImageProvider, FrameRate, AudioProvider);
 
             // Audio Init
@@ -82,36 +60,26 @@ namespace Screna
         }
 
         /// <summary>
-        /// Start Recording.
+        /// Override this method with the code to start recording.
         /// </summary>
-        /// <param name="Delay">Delay before recording starts.</param>
-        public void Start(int Delay = 0)
+        protected override void OnStart()
         {
-            new Thread(() =>
-                {
-                    try
-                    {
-                        Thread.Sleep(Delay);
+            if (_recordThread != null)
+                _continueCapturing.Set();
 
-                        if (_recordThread != null)
-                            _continueCapturing.Set();
+            if (_audioProvider == null)
+                return;
 
-                        if (_audioProvider == null)
-                            return;
+            _videoFrameWritten.Set();
+            _audioBlockWritten.Reset();
 
-                        _videoFrameWritten.Set();
-                        _audioBlockWritten.Reset();
-
-                        _audioProvider.Start();
-                    }
-                    catch (Exception e) { RaiseRecordingStopped(e); }
-                }).Start();
+            _audioProvider.Start();
         }
 
         /// <summary>
-        /// Pause Recording.
+        /// Override this method with the code to pause recording.
         /// </summary>
-        public void Pause()
+        protected override void OnPause()
         {
             if (_recordThread != null)
                 _continueCapturing.Reset();
@@ -120,9 +88,9 @@ namespace Screna
         }
 
         /// <summary>
-        /// Stop Recording and Perform Cleanup.
+        /// Override this method with the code to stop recording.
         /// </summary>
-        public void Stop()
+        protected override void OnStop()
         {
             // Resume if Paused
             _continueCapturing?.Set();
@@ -143,19 +111,19 @@ namespace Screna
             _imageProvider?.Dispose();
 
             _audioProvider?.Dispose();
-            
+
             // WaitHandles
             if (_stopCapturing != null
                 && !_stopCapturing.SafeWaitHandle.IsClosed)
                 _stopCapturing.Dispose();
-            
+
             if (_continueCapturing != null
                 && !_continueCapturing.SafeWaitHandle.IsClosed)
                 _continueCapturing.Dispose();
-            
+
             _videoEncoder?.Dispose();
         }
-
+        
         void Record()
         {
             try

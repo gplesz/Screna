@@ -4,9 +4,6 @@
 
     enum SetWindowPositionFlags
     {
-        NoMove = 0x2,
-        NoSize = 1,
-        NoZOrder = 0x4,
         ShowWindow = 0x400,
         NoActivate = 0x0010
     }

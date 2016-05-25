@@ -68,8 +68,5 @@ namespace Screna.Native
         
         [DllImport(DllName, CharSet = CharSet.Auto)]
         public static extern IntPtr GetForegroundWindow();
-
-        [DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
     }
 }

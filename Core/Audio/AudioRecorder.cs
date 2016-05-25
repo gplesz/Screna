@@ -1,16 +1,12 @@
-﻿using System;
-using System.Threading;
-
-namespace Screna.Audio
+﻿namespace Screna.Audio
 {
     /// <summary>
     /// An <see cref="IRecorder"/> for recording only Audio.
     /// </summary>
-    public class AudioRecorder : IRecorder
+    public class AudioRecorder : RecorderBase
     {
-        IAudioFileWriter _writer;
+        readonly IAudioFileWriter _writer;
         readonly IAudioProvider _audioProvider;
-        readonly SynchronizationContext _syncContext;
 
         /// <summary>
         /// Creates a new instance of <see cref="AudioRecorder"/>.
@@ -21,59 +17,28 @@ namespace Screna.Audio
         {
             _audioProvider = Provider;
             _writer = Writer;
-
-            _syncContext = SynchronizationContext.Current;
-
+            
             _audioProvider.DataAvailable += (s, e) => _writer.Write(e.Buffer, 0, e.Length);
-            _audioProvider.RecordingStopped += (s, e) =>
-            {
-                var handler = RecordingStopped;
-
-                if (handler == null)
-                    return;
-
-                if (_syncContext != null)
-                    _syncContext.Post(S => handler(this, e), null);
-
-                else handler(this, e);
-            };
+            _audioProvider.RecordingStopped += (s, e) => RaiseRecordingStopped(e.Error);
         }
 
         /// <summary>
-        /// Start Recording.
+        /// Override this method with the code to start recording.
         /// </summary>
-        /// <param name="Delay">Delay before starting capture.</param>
-        public void Start(int Delay = 0)
-        {
-            new Thread(() =>
-            {
-                try
-                {
-                    Thread.Sleep(Delay);
-                    
-                    _audioProvider.Start();
-                }
-                catch { }
-            }).Start();
-        }
+        protected override void OnStart() => _audioProvider.Start();
 
         /// <summary>
-        /// Stop Recording.
+        /// Override this method with the code to stop recording.
         /// </summary>
-        public void Stop()
+        protected override void OnStop()
         {
             _audioProvider?.Dispose();
             _writer?.Dispose();
         }
 
         /// <summary>
-        /// Pause Recording.
+        /// Override this method with the code to pause recording.
         /// </summary>
-        public void Pause() => _audioProvider.Stop();
-
-        /// <summary>
-        /// Raised when Recording stops.
-        /// </summary>
-        public event EventHandler<EndEventArgs> RecordingStopped;
+        protected override void OnPause() => _audioProvider.Stop();
     }
 }
