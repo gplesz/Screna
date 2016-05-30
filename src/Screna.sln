@@ -5,15 +5,17 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna", "Core\Screna.csproj", "{23CB9ADB-BA9F-4618-BD0C-589A00A532E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.MouseKeyHook", "Screna.MouseKeyHook\Screna.MouseKeyHook.csproj", "{BFA19237-2364-484E-8C95-166409769081}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.MouseKeyHook", "Extensions\Screna.MouseKeyHook\Screna.MouseKeyHook.csproj", "{BFA19237-2364-484E-8C95-166409769081}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.SharpAvi", "Screna.SharpAvi\Screna.SharpAvi.csproj", "{38AA61F3-EC21-4722-B36E-FA52DF1A28AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.SharpAvi", "Extensions\Screna.SharpAvi\Screna.SharpAvi.csproj", "{38AA61F3-EC21-4722-B36E-FA52DF1A28AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.Bass", "Screna.Bass\Screna.Bass.csproj", "{3EBFE614-C01A-4680-8EF4-5BA144511788}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.Bass", "Extensions\Screna.Bass\Screna.Bass.csproj", "{3EBFE614-C01A-4680-8EF4-5BA144511788}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.NAudio", "Screna.NAudio\Screna.NAudio.csproj", "{6B2D5578-E115-456E-A48C-B8465BE1E0DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.NAudio", "Extensions\Screna.NAudio\Screna.NAudio.csproj", "{6B2D5578-E115-456E-A48C-B8465BE1E0DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.Tests", "Screna.Tests\Screna.Tests.csproj", "{89E17062-E418-4CCB-BEB4-401AD2817CB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screna.Tests", "..\tests\Screna.Tests.csproj", "{89E17062-E418-4CCB-BEB4-401AD2817CB9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{E0B86A86-E28A-4667-90D3-C22B572CE463}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,5 +50,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BFA19237-2364-484E-8C95-166409769081} = {E0B86A86-E28A-4667-90D3-C22B572CE463}
+		{38AA61F3-EC21-4722-B36E-FA52DF1A28AB} = {E0B86A86-E28A-4667-90D3-C22B572CE463}
+		{3EBFE614-C01A-4680-8EF4-5BA144511788} = {E0B86A86-E28A-4667-90D3-C22B572CE463}
+		{6B2D5578-E115-456E-A48C-B8465BE1E0DA} = {E0B86A86-E28A-4667-90D3-C22B572CE463}
 	EndGlobalSection
 EndGlobal
