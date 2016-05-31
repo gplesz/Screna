@@ -10,6 +10,25 @@ namespace Screna
     /// </summary>
     public class MouseCursor : IOverlay
     {
+        #region PInvoke
+        const string DllName = "user32.dll";
+
+        [DllImport(DllName)]
+        static extern bool DestroyIcon(IntPtr hIcon);
+
+        [DllImport(DllName)]
+        static extern IntPtr CopyIcon(IntPtr hIcon);
+
+        [DllImport(DllName)]
+        static extern bool GetCursorInfo(out CursorInfo pci);
+
+        [DllImport(DllName)]
+        static extern bool GetIconInfo(IntPtr hIcon, out IconInfo piconinfo);
+
+        [DllImport(DllName)]
+        static extern bool GetCursorPos(ref Point lpPoint);
+        #endregion
+
         const int CursorShowing = 1;
 
         IconInfo _icInfo;
@@ -30,7 +49,7 @@ namespace Screna
             get
             {
                 var p = new Point();
-                User32.GetCursorPos(ref p);
+                GetCursorPos(ref p);
                 return p;
             }
         }
@@ -52,15 +71,15 @@ namespace Screna
 
             _cursorInfo = new CursorInfo { cbSize = Marshal.SizeOf(typeof(CursorInfo)) };
 
-            if (!User32.GetCursorInfo(out _cursorInfo))
+            if (!GetCursorInfo(out _cursorInfo))
                 return;
 
             if (_cursorInfo.flags != CursorShowing)
                 return;
 
-            _hIcon = User32.CopyIcon(_cursorInfo.hCursor);
+            _hIcon = CopyIcon(_cursorInfo.hCursor);
 
-            if (!User32.GetIconInfo(_hIcon, out _icInfo))
+            if (!GetIconInfo(_hIcon, out _icInfo))
                 return;
 
             var location = new Point(_cursorInfo.ptScreenPos.X - Offset.X - _icInfo.xHotspot,
@@ -70,7 +89,7 @@ namespace Screna
                 using (var cursorBmp = Icon.FromHandle(_hIcon).ToBitmap())
                     g.DrawImage(cursorBmp, new Rectangle(location, cursorBmp.Size));
 
-            User32.DestroyIcon(_hIcon);
+            DestroyIcon(_hIcon);
         }
 
         /// <summary>

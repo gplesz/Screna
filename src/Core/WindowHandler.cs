@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Screna
@@ -11,6 +12,27 @@ namespace Screna
     /// </summary>
     public class WindowHandler
     {
+        #region PInvoke
+        const string DllName = "user32.dll";
+
+        [DllImport(DllName)]
+        static extern bool EnumWindows(EnumWindowsProc proc, IntPtr lParam);
+
+        delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport(DllName)]
+        static extern int GetWindowText(IntPtr hWnd, [Out] StringBuilder lpString, int nMaxCount);
+
+        [DllImport(DllName)]
+        static extern IntPtr GetWindow(IntPtr hWnd, GetWindowEnum uCmd);
+
+        [DllImport(DllName)]
+        static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport(DllName)]
+        static extern bool IsWindowVisible(IntPtr hWnd);
+        #endregion
+
         /// <summary>
         /// Creates a new instance of <see cref="WindowHandler"/>.
         /// </summary>
@@ -20,7 +42,7 @@ namespace Screna
         /// <summary>
         /// Gets whether the Window is Visible.
         /// </summary>
-        public bool IsVisible => User32.IsWindowVisible(Handle);
+        public bool IsVisible => IsWindowVisible(Handle);
 
         /// <summary>
         /// Gets the Window Handle.
@@ -34,8 +56,8 @@ namespace Screna
         {
             get
             {
-                var title = new StringBuilder(User32.GetWindowTextLength(Handle) + 1);
-                User32.GetWindowText(Handle, title, title.Capacity);
+                var title = new StringBuilder(GetWindowTextLength(Handle) + 1);
+                GetWindowText(Handle, title, title.Capacity);
                 return title.ToString();
             }
         }
@@ -47,7 +69,7 @@ namespace Screna
         {
             var list = new List<WindowHandler>();
 
-            User32.EnumWindows((hWnd, lParam) =>
+            EnumWindows((hWnd, lParam) =>
             {
                 var wh = new WindowHandler(hWnd);
 
@@ -69,7 +91,7 @@ namespace Screna
             {
                 if (!User32.GetWindowLong(hWnd, GetWindowLongValue.ExStyle).HasFlag(WindowStyles.AppWindow))
                 {
-                    if (User32.GetWindow(hWnd, GetWindowEnum.Owner) != IntPtr.Zero)
+                    if (GetWindow(hWnd, GetWindowEnum.Owner) != IntPtr.Zero)
                         continue;
 
                     if (User32.GetWindowLong(hWnd, GetWindowLongValue.ExStyle).HasFlag(WindowStyles.ToolWindow))

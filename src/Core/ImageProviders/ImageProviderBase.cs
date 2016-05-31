@@ -34,7 +34,7 @@ namespace Screna
 
                 if (_overlays != null)
                     foreach (var overlay in _overlays)
-                        overlay.Draw(g, _offset);
+                        overlay?.Draw(g, _offset);
             }
 
             return bmp;
@@ -64,7 +64,7 @@ namespace Screna
                 return;
 
             foreach (var overlay in _overlays)
-                overlay.Dispose();
+                overlay?.Dispose();
         }
     }
 }

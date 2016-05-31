@@ -53,7 +53,7 @@ namespace Screna
             int sizeX = Image.Width,
                 sizeY = Image.Height;
 
-            var r = new RECT(-1, -1, -1, -1);
+            var r = new RECT(-1);
 
             using (var b = new UnsafeBitmap(Image))
             {

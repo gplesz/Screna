@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,7 +9,7 @@ namespace Screna
     /// <summary>
     /// Base implementation for <see cref="IRecorder"/> interface.
     /// </summary>
-    public abstract class RecorderBase : IRecorder
+    public abstract class RecorderBase : IRecorder, INotifyPropertyChanged
     {
         readonly SynchronizationContext _syncContext;
         
@@ -43,10 +45,24 @@ namespace Screna
             State = RecorderState.Stopped;
         }
 
+        RecorderState _state = RecorderState.Ready;
+
         /// <summary>
         /// Gets the State of the Recorder.
         /// </summary>
-        public RecorderState State { get; private set; } = RecorderState.Ready;
+        public RecorderState State
+        {
+            get { return _state; }
+            private set
+            {
+                if (_state == value)
+                    return;
+
+                _state = value;
+
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary>
         /// Start Recording.
@@ -108,5 +124,15 @@ namespace Screna
         /// Override this method with the code to pause recording.
         /// </summary>
         protected abstract void OnPause();
+
+        /// <summary>
+        /// Raised when a Property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        void OnPropertyChanged([CallerMemberName] string PropertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+        }
     }
 }

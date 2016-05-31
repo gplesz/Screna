@@ -31,15 +31,9 @@ namespace Screna.Native
         public int Right;
         public int Bottom;
 
-        public RECT(int Left, int Top, int Right, int Bottom)
+        public RECT(int Dimension)
         {
-            this = new RECT
-            {
-                Left = Left,
-                Top = Top,
-                Right = Right,
-                Bottom = Bottom
-            };
+            Left = Top = Right = Bottom = Dimension;
         }
     }
 }

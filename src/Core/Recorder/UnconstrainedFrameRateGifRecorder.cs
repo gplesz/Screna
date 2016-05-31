@@ -24,8 +24,12 @@ namespace Screna
         /// </summary>
         /// <param name="Encoder">The <see cref="GifWriter"/> to write into.</param>
         /// <param name="ImageProvider">The <see cref="IImageProvider"/> providing the individual frames.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="Encoder"/> or <paramref name="ImageProvider"/> is null.</exception>
         public UnconstrainedFrameRateGifRecorder(GifWriter Encoder, IImageProvider ImageProvider)
         {
+            if (Encoder == null)
+                throw new ArgumentNullException(nameof(Encoder));
+
             if (ImageProvider == null)
                 throw new ArgumentNullException(nameof(ImageProvider));
 

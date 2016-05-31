@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace Screna.Tests
 {
@@ -10,11 +9,7 @@ namespace Screna.Tests
         [TestMethod]
         public void RecorderStates()
         {
-            var videoFileWriter = new Mock<IVideoFileWriter>();
-
-            var imageProvider = new Mock<IImageProvider>();
-            
-            var recorder = new Recorder(videoFileWriter.Object, imageProvider.Object, 10);
+            var recorder = new Recorder(SetUp.Get<IVideoFileWriter>(), SetUp.Get<IImageProvider>(), 10);
 
             Assert.AreEqual(recorder.State, RecorderState.Ready);
             
@@ -38,17 +33,10 @@ namespace Screna.Tests
         [TestMethod]
         public void ResizedImageProvider()
         {
-            const int originalWidth = 30,
-                originalHeight = 40,
-                targetWidth = 100,
+            const int targetWidth = 100,
                 targetHeight = 200;
-
-            var imageProvider = new Mock<IImageProvider>();
-            imageProvider.Setup(x => x.Capture()).Returns(new Bitmap(originalWidth, originalHeight));
-            imageProvider.Setup(x => x.Width).Returns(originalWidth);
-            imageProvider.Setup(x => x.Height).Returns(originalHeight);
             
-            var resizedImageProvider = new ResizedImageProvider(imageProvider.Object, targetWidth, targetHeight, Color.Empty);
+            var resizedImageProvider = new ResizedImageProvider(SetUp.Get<IImageProvider>(), targetWidth, targetHeight, Color.Empty);
 
             var capture = resizedImageProvider.Capture();
 

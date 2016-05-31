@@ -32,8 +32,17 @@ namespace Screna
         /// <param name="ImageProvider">Image Provider which provides individual frames.</param>
         /// <param name="FrameRate">Video frame rate.</param>
         /// <param name="AudioProvider">Audio Provider which provides audio data.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="Writer"/> or <paramref name="ImageProvider"/> is null. Use <see cref="AudioRecorder"/> if you want to record audio only.</exception>
         public Recorder(IVideoFileWriter Writer, IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider = null)
         {
+            if (Writer == null)
+                throw new ArgumentNullException(nameof(Writer));
+
+            if (ImageProvider == null)
+                throw new ArgumentNullException(nameof(ImageProvider), 
+                    AudioProvider == null ? $"Use {nameof(AudioRecorder)} if you want to record audio only" 
+                                          : "Argument Null");
+
             // Init Fields
             _imageProvider = ImageProvider;
             _videoEncoder = Writer;
@@ -48,12 +57,11 @@ namespace Screna
             else _audioProvider = null;
 
             // RecordThread Init
-            if (ImageProvider != null)
-                _recordThread = new Thread(Record)
-                {
-                    Name = "Captura.Record",
-                    IsBackground = true
-                };
+            _recordThread = new Thread(Record)
+            {
+                Name = "Captura.Record",
+                IsBackground = true
+            };
 
             // Not Actually Started, Waits for ContinueThread to be Set
             _recordThread?.Start();

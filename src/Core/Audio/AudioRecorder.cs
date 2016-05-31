@@ -1,4 +1,6 @@
-﻿namespace Screna.Audio
+﻿using System;
+
+namespace Screna.Audio
 {
     /// <summary>
     /// An <see cref="IRecorder"/> for recording only Audio.
@@ -13,8 +15,15 @@
         /// </summary>
         /// <param name="Provider">The Audio Source.</param>
         /// <param name="Writer">The <see cref="IAudioFileWriter"/> to write audio to.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="Provider"/> or <paramref name="Writer"/> is null.</exception>
         public AudioRecorder(IAudioProvider Provider, IAudioFileWriter Writer)
         {
+            if (Provider == null)
+                throw new ArgumentNullException(nameof(Provider));
+
+            if (Writer == null)
+                throw new ArgumentNullException(nameof(Writer));
+
             _audioProvider = Provider;
             _writer = Writer;
             

@@ -28,7 +28,7 @@ namespace Screna.Lame
         #region Constructors
         static Mp3EncoderLame()
         {
-            SharpAviLame.SetLameDllLocation(Path.Combine(typeof(Mp3EncoderLame).Assembly.Location, $"lameenc{(Environment.Is64BitProcess ? 64 : 32)}.dll"));
+            SharpAviLame.SetLameDllLocation(Path.Combine(Path.GetDirectoryName(typeof(Mp3EncoderLame).Assembly.Location), $"lameenc{(Environment.Is64BitProcess ? 64 : 32)}.dll"));
         }
 
         /// <summary>
