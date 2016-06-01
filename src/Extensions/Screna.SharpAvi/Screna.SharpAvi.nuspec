@@ -2,28 +2,23 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Screna.SharpAvi</id>
-        <version>0.1.1</version>
+        <version>0.2.0</version>
         <authors>MathewSachin</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>
 Avi and Lame (Mp3 encoding) support for Screna using SharpAvi.
 
 Download the LAME binaries from lame.sourceforge.net and name as lameenc32.dll and lameenc64.dll.
-
-Install the Screna package first.
-Source code is added to the current project in Screna\SharpAvi folder.
-Also, the SharpAvi package is installed.
         </description>
         <summary>Avi support for Screna using SharpAvi.</summary>
-        <copyright>(c) 2016 Mathew Sachin</copyright>
+        <copyright>(c) 2016 Mathew Sachin</copyright>        
+        <dependencies>
+            <dependency id="SharpAvi" version="2.1.0" />
+            <dependency id="Screna" version="0.3.1" />
+        </dependencies>
     </metadata>
     <files>
-        <file src="AviCodec.cs" target="content\Screna\SharpAvi"/>
-        <file src="AviWriter.cs" target="content\Screna\SharpAvi"/>
-        <file src="IAudioEncoderWrapper.cs" target="content\Screna\SharpAvi"/>
-        <file src="IAudioProviderWrapper.cs" target="content\Screna\SharpAvi"/>
-    </files>    
-    <dependencies>
-        <dependency id="SharpAvi" version="2.1.0" />
-    </dependencies>
+        <file src="bin\Release\Screna.SharpAvi.dll" target="lib\net40"/>
+        <file src="bin\Release\Screna.SharpAvi.xml" target="lib\net40"/>
+    </files>
 </package>
