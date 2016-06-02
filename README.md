@@ -1,17 +1,20 @@
 ![Logo](Screna.png)
 # Screna
-[![Build status](https://ci.appveyor.com/api/projects/status/nadvi6vf6kl999g5?svg=true)](https://ci.appveyor.com/project/MathewSachin/screna)  
 .Net Capture Solution to Capture Screen/Audio/Video/Mouse Cursor/KeyStrokes and more...
 
 Screna provides a highly extensible API to develop Capturing Apps.
 
 # News
+* Added an FFMpegVideoWriter in Screna.FFMpeg namespace which uses ffmpeg.exe for encoding.
+
+* Extension packages now supply libraries instead of source-code.
+
 * Merged Screna.Lame into Screna.SharpAvi.
+
+* Added a BASS audio library extension for Screna.
 
 * Screna is now composed of a collection of packages, instead of a single one.  
   Main reasons behind this were licensing issues and the mess involved in copying code from other projects into Screna.
-  
-* Added a BASS audio library extension for Screna.
   
 Package             | Feature
 --------------------|--------------------------------------------
