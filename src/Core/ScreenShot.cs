@@ -5,7 +5,6 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Interop;
 
 namespace Screna
 {
@@ -95,17 +94,6 @@ namespace Screna
         public static Bitmap Capture(Form Form, bool IncludeCursor = false)
         {
             return Capture(Form.Handle, IncludeCursor);
-        }
-
-        /// <summary>
-        /// Captures a Specific WPF Window.
-        /// </summary>
-        /// <param name="Window">The <see cref="System.Windows.Window"/> to Capture</param>
-        /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
-        /// <returns>The Captured Image.</returns>
-        public static Bitmap Capture(System.Windows.Window Window, bool IncludeCursor = false)
-        {
-            return Capture(new WindowInteropHelper(Window).Handle, IncludeCursor);
         }
 
         /// <summary>

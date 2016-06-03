@@ -3,22 +3,22 @@
 namespace Screna.Audio
 {
     /// <summary>
-    /// Generic interface for wave recording
+    /// Provides Recorded Audio.
     /// </summary>
     public interface IAudioProvider : IDisposable
     {
         /// <summary>
-        /// Gets the Recording WaveFormat
+        /// Gets the Recording WaveFormat.
         /// </summary>
         WaveFormat WaveFormat { get; }
 
         /// <summary>
-        /// Start Recording
+        /// Start Recording.
         /// </summary>
         void Start();
 
         /// <summary>
-        /// Stop Recording
+        /// Stop Recording.
         /// </summary>
         void Stop();
 
@@ -28,7 +28,7 @@ namespace Screna.Audio
         bool IsSynchronizable { get; }
 
         /// <summary>
-        /// Indicates recorded data is available 
+        /// Indicates recorded data is available.
         /// </summary>
         event EventHandler<DataAvailableEventArgs> DataAvailable;
 

@@ -24,11 +24,11 @@ namespace Screna.Tests
 
         static void InitImageProvider()
         {
-            const int originalWidth = 30, originalHeight = 40;
+            const int originalWidth = 3, originalHeight = 4;
 
             var imageProvider = new Mock<IImageProvider>();
 
-            imageProvider.Setup(X => X.Capture()).Returns(new Bitmap(originalWidth, originalHeight));
+            imageProvider.Setup(X => X.Capture()).Returns(() => new Bitmap(originalWidth, originalHeight));
 
             imageProvider.Setup(X => X.Width).Returns(originalWidth);
             imageProvider.Setup(X => X.Height).Returns(originalHeight);

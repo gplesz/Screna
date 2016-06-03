@@ -7,16 +7,30 @@ using WaveFormat = Screna.Audio.WaveFormat;
 
 namespace Screna.NAudio
 {
+    /// <summary>
+    /// Provides Audio from Wasapi Loopback.
+    /// </summary>
     public class LoopbackProvider : IAudioProvider
     {
         readonly WasapiOut _silenceOut;
         readonly WasapiLoopbackCapture _capture;
         static readonly MMDeviceEnumerator DeviceEnumerator = new MMDeviceEnumerator();
 
+        /// <summary>
+        /// Gets the Default Wasapi Loopback Device.
+        /// </summary>
         public static MMDevice DefaultDevice => DeviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
+        /// <summary>
+        /// Enumerates Wasapi Loopback Devices.
+        /// </summary>
         public static IEnumerable<MMDevice> EnumerateDevices() => DeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
 
+        /// <summary>
+        /// Create a new instance of <see cref="LoopbackProvider"/>.
+        /// </summary>
+        /// <param name="Device"><see cref="MMDevice"/> to use.</param>
+        /// <param name="IncludeSilence">Whether to record silence?... default = true</param>
         public LoopbackProvider(MMDevice Device = null, bool IncludeSilence = true)
         {
             if (Device == null)
@@ -37,25 +51,47 @@ namespace Screna.NAudio
             _silenceOut.Init(new SilenceProvider());
         }
 
+        /// <summary>
+        /// Gets the Wasapi MixFormat used for Loopback.
+        /// </summary>
         public WaveFormat WaveFormat { get; }
 
+        /// <summary>
+        /// Start Recording.
+        /// </summary>
         public void Start()
         {
             _silenceOut.Play();
             _capture.StartRecording();
         }
 
+        /// <summary>
+        /// Stop Recording.
+        /// </summary>
         public void Stop()
         {
             _capture.StopRecording();
             _silenceOut.Stop();
         }
 
+        /// <summary>
+        /// Not synchronizable with video.
+        /// </summary>
         public bool IsSynchronizable => false;
 
+        /// <summary>
+        /// Indicates recorded data is available.
+        /// </summary>
         public event EventHandler<DataAvailableEventArgs> DataAvailable;
+
+        /// <summary>
+        /// Indicates that all recorded data has now been received.
+        /// </summary>
         public event EventHandler<EndEventArgs> RecordingStopped;
 
+        /// <summary>
+        /// Frees up the resources used by this instant.
+        /// </summary>
         public void Dispose()
         {
             _capture?.Dispose();

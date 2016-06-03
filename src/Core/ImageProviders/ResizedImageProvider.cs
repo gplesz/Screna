@@ -76,7 +76,7 @@ namespace Screna
         public int Width { get; }
 
         /// <summary>
-        /// Frees all resources used by this object.
+        /// The Source <see cref="IImageProvider"/> is not freed here.
         /// </summary>
         public void Dispose() { }
     }

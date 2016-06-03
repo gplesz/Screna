@@ -28,6 +28,12 @@ namespace Screna.Tests
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentNullException))]
+        public void RotatedImageProviderNullSource()
+        {
+            using (new RotatedImageProvider(null, RotateFlipType.RotateNoneFlipNone)) { }
+        }
+
+        [TestMethod, ExpectedException(typeof(ArgumentNullException))]
         public void ScreenProviderNullSource()
         {
             using (new ScreenProvider(null)) { }

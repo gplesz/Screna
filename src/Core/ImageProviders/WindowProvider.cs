@@ -2,8 +2,8 @@
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Windows.Interop;
-using SysParams = System.Windows.SystemParameters;
+//using System.Windows.Interop;
+//using SysParams = System.Windows.SystemParameters;
 
 namespace Screna
 {
@@ -55,15 +55,21 @@ namespace Screna
 
         static WindowProvider()
         {
-            using (var source = new HwndSource(new HwndSourceParameters()))
-            {
-                var toDevice = source.CompositionTarget?.TransformToDevice;
+            //// TODO: Use some alternative which does not require STAThread
+            //using (var source = new HwndSource(new HwndSourceParameters()))
+            //{
+            //    var toDevice = source.CompositionTarget?.TransformToDevice;
 
-                DesktopHeight = toDevice == null ? (int)SysParams.VirtualScreenHeight : (int)Math.Round(SysParams.VirtualScreenHeight * toDevice.Value.M22);
-                DesktopWidth = toDevice == null ? (int)SysParams.VirtualScreenWidth : (int)Math.Round(SysParams.VirtualScreenWidth * toDevice.Value.M11);
+            //    DesktopHeight = toDevice == null ? (int)SysParams.VirtualScreenHeight : (int)Math.Round(SysParams.VirtualScreenHeight * toDevice.Value.M22);
+            //    DesktopWidth = toDevice == null ? (int)SysParams.VirtualScreenWidth : (int)Math.Round(SysParams.VirtualScreenWidth * toDevice.Value.M11);
 
-                DesktopRectangle = new Rectangle((int)SysParams.VirtualScreenLeft, (int)SysParams.VirtualScreenTop, DesktopWidth, DesktopHeight);
-            }
+            //    DesktopRectangle = new Rectangle((int)SysParams.VirtualScreenLeft, (int)SysParams.VirtualScreenTop, DesktopWidth, DesktopHeight);
+            //}
+
+            DesktopRectangle = System.Windows.Forms.SystemInformation.VirtualScreen;
+
+            DesktopHeight = DesktopRectangle.Height;
+            DesktopWidth = DesktopRectangle.Width;
         }
 
         readonly Func<IntPtr> _hWnd;

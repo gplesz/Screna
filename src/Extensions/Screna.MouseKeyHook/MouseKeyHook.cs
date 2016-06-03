@@ -1,4 +1,5 @@
 ﻿using Gma.System.MouseKeyHook;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -60,9 +61,6 @@ namespace Screna
             KeyStrokeFont = new Font(FontFamily.GenericMonospace, 60);
             KeyStrokeLocation = new Point(100, 100);
 
-            if (!CaptureKeystrokes && !CaptureMouseClicks)
-                return;
-            
             _hook = Hook.GlobalEvents();
 
             if (CaptureMouseClicks)

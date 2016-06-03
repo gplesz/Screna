@@ -8,12 +8,20 @@ using WaveFormat = Screna.Audio.WaveFormat;
 
 namespace Screna.Bass
 {
+    /// <summary>
+    /// Provides Audio from Wasapi Loopback.
+    /// </summary>
     public class LoopbackProvider : IAudioProvider
     {
         readonly Silence _silencePlayer;
         readonly int _deviceIndex;
         readonly WasapiProcedure _proc;
 
+        /// <summary>
+        /// Create a new instance of <see cref="LoopbackProvider"/>.
+        /// </summary>
+        /// <param name="Device"><see cref="WasapiLoopbackDevice"/> to use.</param>
+        /// <param name="IncludeSilence">Whether to record silence?... default = true</param>
         public LoopbackProvider(WasapiLoopbackDevice Device, bool IncludeSilence = true)
         {
             _deviceIndex = Device.DeviceIndex;
@@ -30,12 +38,24 @@ namespace Screna.Bass
             WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(info.Frequency, info.Channels);
         }
 
+        /// <summary>
+        /// Not synchronizable with video.
+        /// </summary>
         public bool IsSynchronizable => false;
         
+        /// <summary>
+        /// Gets the Wasapi MixFormat used for Loopback.
+        /// </summary>
         public WaveFormat WaveFormat { get; }
 
+        /// <summary>
+        /// Indicates recorded data is available.
+        /// </summary>
         public event EventHandler<DataAvailableEventArgs> DataAvailable;
-        
+
+        /// <summary>
+        /// Indicates that all recorded data has now been received.
+        /// </summary>
         public event EventHandler<EndEventArgs> RecordingStopped;
 
         byte[] _buffer;
@@ -52,13 +72,19 @@ namespace Screna.Bass
             return Length;
         }
 
+        /// <summary>
+        /// Frees up the resources used by this instant.
+        /// </summary>
         public void Dispose()
         {
             BassWasapi.CurrentDevice = _deviceIndex;
             BassWasapi.Free();
             _silencePlayer?.Dispose();
         }
-
+        
+        /// <summary>
+        /// Start Recording.
+        /// </summary>
         public void Start()
         {
             _silencePlayer?.Start();
@@ -69,6 +95,9 @@ namespace Screna.Bass
                 _silencePlayer?.Stop();
         }
 
+        /// <summary>
+        /// Stop Recording.
+        /// </summary>
         public void Stop()
         {
             _silencePlayer?.Stop();

@@ -20,7 +20,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>    
+    <Optimize>false</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -29,13 +29,9 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\AudioFileWriters\AudioFileWriter.cs" />
@@ -47,11 +43,12 @@
     <Compile Include="EventArgs\DataAvailableEventArgs.cs" />
     <Compile Include="EventArgs\EndEventArgs.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FFMpegVideoWriter.cs" />
-    <Compile Include="GifWriter.cs" />
+    <Compile Include="ImageProviders\RotatedImageProvider.cs" />
+    <Compile Include="VideoWriter\FFMpegVideoWriter.cs" />
+    <Compile Include="VideoWriter\GifWriter.cs" />
     <Compile Include="ImageProviders\ImageProviderBase.cs" />
     <Compile Include="ImageProviders\RegionProvider.cs" />
-    <Compile Include="IVideoFileWriter.cs" />
+    <Compile Include="VideoWriter\IVideoFileWriter.cs" />
     <Compile Include="ImageProviders\IImageProvider.cs" />
     <Compile Include="ImageProviders\ScreenProvider.cs" />
     <Compile Include="ImageProviders\WindowProvider.cs" />

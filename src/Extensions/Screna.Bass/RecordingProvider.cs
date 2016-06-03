@@ -41,10 +41,19 @@ namespace Screna.Bass
 
         readonly int _handle;
 
+        /// <summary>
+        /// Frees up the resources used by this instant.
+        /// </summary>
         public void Dispose() => BASS.StreamFree(_handle);
 
+        /// <summary>
+        /// Start Recording.
+        /// </summary>
         public void Start() => BASS.ChannelPlay(_handle);
 
+        /// <summary>
+        /// Stop Recording.
+        /// </summary>
         public void Stop() => BASS.ChannelPause(_handle);
         
         public bool IsSynchronizable { get; }
@@ -65,8 +74,14 @@ namespace Screna.Bass
             return true;
         }
 
+        /// <summary>
+        /// Indicates recorded data is available.
+        /// </summary>
         public event EventHandler<DataAvailableEventArgs> DataAvailable;
-        
+
+        /// <summary>
+        /// Indicates that all recorded data has now been received.
+        /// </summary>
         public event EventHandler<EndEventArgs> RecordingStopped;
     }
 }
