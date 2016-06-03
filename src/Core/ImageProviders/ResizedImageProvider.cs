@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 namespace Screna
 {
     /// <summary>
-    /// Wraps up another IImageProvider to provide images resied to required dimensions.
+    /// Wraps up another <see cref="IImageProvider"/> to provide images resied to required dimensions.
     /// </summary>
     public class ResizedImageProvider : IImageProvider
     {
