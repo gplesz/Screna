@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Screna.SharpAvi</id>
-        <version>0.2.0</version>
+        <version>0.3.0</version>
         <authors>MathewSachin</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>
@@ -14,7 +14,7 @@ Download the LAME binaries from lame.sourceforge.net and name as lameenc32.dll a
         <copyright>(c) 2016 Mathew Sachin</copyright>        
         <dependencies>
             <dependency id="SharpAvi" version="2.1.0" />
-            <dependency id="Screna" version="0.3.1" />
+            <dependency id="Screna" version="0.4.0" />
         </dependencies>
     </metadata>
     <files>
