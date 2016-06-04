@@ -20,10 +20,9 @@ namespace Screna.Avi
         AviInternalWriter _writer;
         IAviVideoStream _videoStream;
         IAviAudioStream _audioStream;
-        IAudioProvider _audioFacade;
+        IAudioProvider _audioProvider;
         byte[] _videoBuffer;
         readonly string _fileName;
-        readonly IAudioEncoder _audioEncoder;
         readonly AviCodec _codec;
 
         /// <summary>
@@ -43,12 +42,9 @@ namespace Screna.Avi
         /// <param name="FileName">Output file path.</param>
         /// <param name="Codec">The Avi Codec.</param>
         /// <param name="AudioEncoder">The <see cref="IAudioEncoder"/> to use to encode Audio... null (default) = don't encode audio.</param>
-        public AviWriter(string FileName,
-                         AviCodec Codec,
-                         IAudioEncoder AudioEncoder = null)
+        public AviWriter(string FileName, AviCodec Codec)
         {
             _fileName = FileName;
-            _audioEncoder = AudioEncoder;
             _codec = Codec;
         }
 
@@ -61,7 +57,7 @@ namespace Screna.Avi
         public void Init(IImageProvider ImageProvider, int FrameRate, IAudioProvider AudioProvider)
         {
             this.FrameRate = FrameRate;
-            _audioFacade = AudioProvider;
+            _audioProvider = AudioProvider;
             _videoBuffer = new byte[ImageProvider.Width * ImageProvider.Height * 4];
 
             _writer = new AviInternalWriter(_fileName)
@@ -70,10 +66,10 @@ namespace Screna.Avi
                 EmitIndex1 = true
             };
 
-            CreateVideoStream(ImageProvider.Width, ImageProvider.Height, _codec);
+            CreateVideoStream(ImageProvider.Width, ImageProvider.Height);
 
             if (AudioProvider != null)
-                CreateAudioStream(_audioFacade, _audioEncoder);
+                CreateAudioStream();
         }
 
         /// <summary>
@@ -90,14 +86,13 @@ namespace Screna.Avi
             return _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length);
         }
 
-        #region Private Methods
-        void CreateVideoStream(int Width, int Height, AviCodec Codec)
+        void CreateVideoStream(int Width, int Height)
         {
             // Select encoder type based on FOURCC of codec
-            if (Codec == AviCodec.Uncompressed)
+            if (_codec == AviCodec.Uncompressed)
                 _videoStream = _writer.AddUncompressedVideoStream(Width, Height);
-            else if (Codec == AviCodec.MotionJpeg)
-                _videoStream = _writer.AddMotionJpegVideoStream(Width, Height, Codec.Quality);
+            else if (_codec == AviCodec.MotionJpeg)
+                _videoStream = _writer.AddMotionJpegVideoStream(Width, Height, _codec.Quality);
             else
             {
                 _videoStream = _writer.AddMpeg4VideoStream(Width, Height,
@@ -105,26 +100,22 @@ namespace Screna.Avi
                     // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
                     // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
                     0,
-                    Codec.Quality,
+                    _codec.Quality,
                     // Most of VfW codecs expect single-threaded use, so we wrap this encoder to special wrapper
                     // Thus all calls to the encoder (including its instantiation) will be invoked on a single thread although encoding (and writing) is performed asynchronously
-                    Codec.FourCC,
+                    _codec.FourCC,
                     true);
             }
 
             _videoStream.Name = "ScrenaVideo";
         }
 
-        void CreateAudioStream(IAudioProvider AudioFacade, IAudioEncoder AudioEncoder)
+        void CreateAudioStream()
         {
-            // Create encoding or simple stream based on settings
-            _audioStream = AudioEncoder != null 
-                ? _writer.AddEncodingAudioStream(new IAudioEncoderWrapper(AudioEncoder))
-                : _writer.AddEncodingAudioStream(new IAudioProviderWrapper(AudioFacade));
+            _audioStream = _writer.AddEncodingAudioStream(new IAudioProviderWrapper(_audioProvider));
 
             _audioStream.Name = "ScrenaAudio";
         }
-        #endregion
 
         /// <summary>
         /// Enumerates all available Avi Encoders.
@@ -151,7 +142,7 @@ namespace Screna.Avi
         {
             _writer?.Close();
             
-            _audioFacade?.Dispose();
+            _audioProvider?.Dispose();
         }
     }
 }

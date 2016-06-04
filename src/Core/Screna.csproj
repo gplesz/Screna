@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\AudioFileWriters\AudioFileWriter.cs" />
+    <Compile Include="Audio\EncodedAudioProvider.cs" />
     <Compile Include="Audio\IAudioProvider.cs" />
     <Compile Include="Audio\WaveFormat\WaveFormatExtra.cs" />
     <Compile Include="Audio\WaveFormat\WaveFormat.cs" />
