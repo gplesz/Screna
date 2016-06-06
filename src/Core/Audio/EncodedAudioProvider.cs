@@ -11,6 +11,11 @@ namespace Screna.Audio
         readonly IAudioEncoder _audioEncoder;
         byte[] _encodedBuffer;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="EncodedAudioProvider"/>.
+        /// </summary>
+        /// <param name="AudioProvider">The <see cref="IAudioProvider"/> to wrap.</param>
+        /// <param name="AudioEncoder">The <see cref="IAudioEncoder"/> to use.</param>
         public EncodedAudioProvider(IAudioProvider AudioProvider, IAudioEncoder AudioEncoder)
         {
             if (AudioProvider == null)

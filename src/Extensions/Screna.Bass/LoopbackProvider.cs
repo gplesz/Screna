@@ -16,6 +16,13 @@ namespace Screna.Bass
         readonly Silence _silencePlayer;
         readonly int _deviceIndex;
         readonly WasapiProcedure _proc;
+        
+        /// <summary>
+        /// Create a new instance of <see cref="LoopbackProvider"/> using <see cref="WasapiLoopbackDevice.DefaultDevice"/>.
+        /// </summary>
+        /// <param name="IncludeSilence">Whether to record silence?... default = true</param>
+        public LoopbackProvider(bool IncludeSilence = true) 
+            : this(WasapiLoopbackDevice.DefaultDevice, IncludeSilence) { }
 
         /// <summary>
         /// Create a new instance of <see cref="LoopbackProvider"/>.

@@ -41,7 +41,6 @@ namespace Screna.Avi
         /// </summary>
         /// <param name="FileName">Output file path.</param>
         /// <param name="Codec">The Avi Codec.</param>
-        /// <param name="AudioEncoder">The <see cref="IAudioEncoder"/> to use to encode Audio... null (default) = don't encode audio.</param>
         public AviWriter(string FileName, AviCodec Codec)
         {
             _fileName = FileName;
@@ -79,11 +78,14 @@ namespace Screna.Avi
         /// <returns>The Task Object.</returns>
         public Task WriteFrameAsync(Bitmap Image)
         {
-            var bits = Image.LockBits(new Rectangle(Point.Empty, Image.Size), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
-            Marshal.Copy(bits.Scan0, _videoBuffer, 0, _videoBuffer.Length);
-            Image.UnlockBits(bits);
+            return Task.Run(async () =>
+            {
+                var bits = Image.LockBits(new Rectangle(Point.Empty, Image.Size), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
+                Marshal.Copy(bits.Scan0, _videoBuffer, 0, _videoBuffer.Length);
+                Image.UnlockBits(bits);
 
-            return _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length);
+                await _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length);
+            });
         }
 
         void CreateVideoStream(int Width, int Height)

@@ -7,9 +7,39 @@ using WaveFormat = Screna.Audio.WaveFormat;
 
 namespace Screna.Bass
 {
+    /// <summary>
+    /// Provides audio from Microphone.
+    /// </summary>
     public class RecordingProvider : IAudioProvider
     {
-        public RecordingProvider(RecordingDevice Device, WaveFormat Wf, int FrameRate = -1)
+        /// <summary>
+        /// Creates a new instance of <see cref="RecordingProvider"/> using Default Device and <see cref="WaveFormat"/>.
+        /// </summary>
+        public RecordingProvider()
+            : this(RecordingDevice.DefaultDevice) { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RecordingProvider"/> using Default <see cref="WaveFormat"/>.
+        /// </summary>
+        /// <param name="Device">The Recording Device.</param>
+        public RecordingProvider(RecordingDevice Device)
+            : this(Device, new WaveFormat()) { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="RecordingProvider"/>.
+        /// </summary>
+        /// <param name="Device">The Recording Device.</param>
+        /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
+        public RecordingProvider(RecordingDevice Device, WaveFormat Wf)
+            : this(Device, Wf, -1) { }
+
+        /// <summary>
+        /// Creates a new synchronizable instance of <see cref="RecordingProvider"/> to be used with an <see cref="IRecorder"/>.
+        /// </summary>
+        /// <param name="Device">The Recording Device.</param>
+        /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
+        /// <param name="FrameRate">The <see cref="IRecorder"/>'s FrameRate.</param>
+        public RecordingProvider(RecordingDevice Device, WaveFormat Wf, int FrameRate)
         {
             WaveFormat = Wf;
             
@@ -55,9 +85,15 @@ namespace Screna.Bass
         /// Stop Recording.
         /// </summary>
         public void Stop() => BASS.ChannelPause(_handle);
-        
+
+        /// <summary>
+        /// Gets whether this <see cref="IAudioProvider"/> is Synchronizable.
+        /// </summary>
         public bool IsSynchronizable { get; }
-        
+
+        /// <summary>
+        /// Gets the output <see cref="WaveFormat"/>.
+        /// </summary>
         public WaveFormat WaveFormat { get; }
 
         byte[] _buffer;

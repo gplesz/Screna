@@ -38,13 +38,7 @@ namespace Screna.Tests
         {
             using (new ScreenProvider(null)) { }
         }
-
-        [TestMethod, ExpectedException(typeof(ArgumentNullException))]
-        public void WindowProviderNullFunc()
-        {
-            using (new WindowProvider(null)) { }
-        }
-
+        
         [TestMethod, ExpectedException(typeof(ArgumentNullException))]
         public void RecorderVideoFileWriterNull()
         {

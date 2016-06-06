@@ -3,6 +3,9 @@ using NAudio.Wave;
 
 namespace Screna.NAudio
 {
+    /// <summary>
+    /// WaveIn Device to be used with <see cref="WaveInProvider"/>.
+    /// </summary>
     public class WaveInDevice
     {
         /// <summary>
@@ -10,6 +13,10 @@ namespace Screna.NAudio
         /// </summary>
         public int DeviceNumber { get; }
 
+        /// <summary>
+        /// Creates a new instance <see cref="WaveInDevice"/>.
+        /// </summary>
+        /// <param name="DeviceNumber">Index of the Device.</param>
         public WaveInDevice(int DeviceNumber)
         {
             this.DeviceNumber = DeviceNumber;
@@ -25,6 +32,11 @@ namespace Screna.NAudio
         /// </summary>
         public static int DeviceCount => WaveIn.DeviceCount;
 
+        /// <summary>
+        /// Checks if a WaveFormat is supported by the device.
+        /// </summary>
+        /// <param name="WaveFormat">The WaveFormat to check.</param>
+        /// <returns>true if supported, else false.</returns>
         public bool SupportsWaveFormat(SupportedWaveFormat WaveFormat) => WaveIn.GetCapabilities(DeviceNumber).SupportsWaveFormat(WaveFormat);
 
         /// <summary>

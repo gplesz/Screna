@@ -50,16 +50,16 @@ namespace Screna
         /// <summary>
         /// Captures a Specific Window.
         /// </summary>
-        /// <param name="WindowHandle">Handle of the Window to Capture</param>
+        /// <param name="Window">The <see cref="Window"/> to Capture</param>
         /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
         /// <returns>The Captured Image.</returns>
-        public static Bitmap Capture(IntPtr WindowHandle, bool IncludeCursor = false)
+        public static Bitmap Capture(Window Window, bool IncludeCursor = false)
         {
             RECT r;
-            User32.GetWindowRect(WindowHandle, out r);
+            User32.GetWindowRect(Window.Handle, out r);
             var region = r.ToRectangle();
 
-            IntPtr hSrc = GetWindowDC(WindowHandle),
+            IntPtr hSrc = GetWindowDC(Window.Handle),
                 hDest = Gdi32.CreateCompatibleDC(hSrc),
                 hBmp = Gdi32.CreateCompatibleBitmap(hSrc, region.Width, region.Height),
                 hOldBmp = Gdi32.SelectObject(hDest, hBmp);
@@ -91,10 +91,7 @@ namespace Screna
         /// <param name="Form">The <see cref="Form"/> to Capture</param>
         /// <param name="IncludeCursor">Whether to include the Mouse Cursor.</param>
         /// <returns>The Captured Image.</returns>
-        public static Bitmap Capture(Form Form, bool IncludeCursor = false)
-        {
-            return Capture(Form.Handle, IncludeCursor);
-        }
+        public static Bitmap Capture(Form Form, bool IncludeCursor = false) => Capture(new Window(Form.Handle), IncludeCursor);
 
         /// <summary>
         /// Captures the entire Desktop.
@@ -110,9 +107,9 @@ namespace Screna
         /// <summary>
         /// Capture transparent Screenshot of a Window.
         /// </summary>
-        /// <param name="WindowHandle">Handle of the Window to Capture.</param>
+        /// <param name="Window">The <see cref="Window"/> to Capture.</param>
         /// <param name="IncludeCursor">Whether to include Mouse Cursor.</param>
-        public static unsafe Bitmap CaptureTransparent(IntPtr WindowHandle, bool IncludeCursor = false)
+        public static unsafe Bitmap CaptureTransparent(Window Window, bool IncludeCursor = false)
         {
             var tmpColour = Color.White;
 
@@ -129,9 +126,9 @@ namespace Screna
 
             const int extendedFrameBounds = 0;
 
-            if (DwmGetWindowAttribute(WindowHandle, extendedFrameBounds, ref r, sizeof(RECT)) != 0)
+            if (DwmGetWindowAttribute(Window.Handle, extendedFrameBounds, ref r, sizeof(RECT)) != 0)
                 // DwmGetWindowAttribute() failed, usually means Aero is disabled so we fall back to GetWindowRect()
-                User32.GetWindowRect(WindowHandle, out r);
+                User32.GetWindowRect(Window.Handle, out r);
 
             var R = r.ToRectangle();
 
@@ -142,7 +139,7 @@ namespace Screna
             R.Intersect(WindowProvider.DesktopRectangle);
 
             ShowWindow(backdrop.Handle, 4);
-            SetWindowPos(backdrop.Handle, WindowHandle,
+            SetWindowPos(backdrop.Handle, Window.Handle,
                 R.Left, R.Top,
                 R.Width, R.Height,
                 SetWindowPositionFlags.NoActivate);
@@ -171,7 +168,7 @@ namespace Screna
         /// <summary>
         /// Capture transparent Screenshot of a Window.
         /// </summary>
-        /// <param name="Handle">Handle of the Window to Capture.</param>
+        /// <param name="Window">The <see cref="Window"/> to Capture.</param>
         /// <param name="IncludeCursor">Whether to include Mouse Cursor.</param>
         /// <param name="DoResize">
         /// Whether to Capture at another size.
@@ -179,53 +176,53 @@ namespace Screna
         /// </param>
         /// <param name="ResizeWidth">Capture Width.</param>
         /// <param name="ResizeHeight">Capture Height.</param>
-        public static Bitmap CaptureTransparent(IntPtr Handle, bool IncludeCursor, bool DoResize, int ResizeWidth, int ResizeHeight)
+        public static Bitmap CaptureTransparent(Window Window, bool IncludeCursor, bool DoResize, int ResizeWidth, int ResizeHeight)
         {
             var startButtonHandle = User32.FindWindow("Button", "Start");
             var taskbarHandle = User32.FindWindow("Shell_TrayWnd", null);
 
-            var canResize = DoResize && User32.GetWindowLong(Handle, GetWindowLongValue.Style).HasFlag(WindowStyles.SizeBox);
+            var canResize = DoResize && User32.GetWindowLong(Window.Handle, GetWindowLongValue.Style).HasFlag(WindowStyles.SizeBox);
 
             try
             {
                 // Hide the taskbar, just incase it gets in the way
-                if (Handle != startButtonHandle && Handle != taskbarHandle)
+                if (Window.Handle != startButtonHandle && Window.Handle != taskbarHandle)
                 {
                     ShowWindow(startButtonHandle, 0);
                     ShowWindow(taskbarHandle, 0);
                     Application.DoEvents();
                 }
 
-                if (IsIconic(Handle))
+                if (IsIconic(Window.Handle))
                 {
-                    ShowWindow(Handle, 1);
+                    ShowWindow(Window.Handle, 1);
                     Thread.Sleep(300); // Wait for window to be restored
                 }
                 else
                 {
-                    ShowWindow(Handle, 5);
+                    ShowWindow(Window.Handle, 5);
                     Thread.Sleep(100);
                 }
 
-                SetForegroundWindow(Handle);
+                SetForegroundWindow(Window.Handle);
 
                 var r = new RECT();
 
                 if (canResize)
                 {
-                    User32.GetWindowRect(Handle, out r);
+                    User32.GetWindowRect(Window.Handle, out r);
 
-                    SetWindowPos(Handle, IntPtr.Zero, r.Left, r.Top, ResizeWidth, ResizeHeight, SetWindowPositionFlags.ShowWindow);
+                    SetWindowPos(Window.Handle, IntPtr.Zero, r.Left, r.Top, ResizeWidth, ResizeHeight, SetWindowPositionFlags.ShowWindow);
 
                     Thread.Sleep(100);
                 }
 
-                var s = CaptureTransparent(Handle, IncludeCursor);
+                var s = CaptureTransparent(Window, IncludeCursor);
 
                 var R = r.ToRectangle();
 
                 if (canResize)
-                    SetWindowPos(Handle, IntPtr.Zero,
+                    SetWindowPos(Window.Handle, IntPtr.Zero,
                         R.Left, R.Top,
                         R.Width, R.Height,
                         SetWindowPositionFlags.ShowWindow);
@@ -234,7 +231,7 @@ namespace Screna
             }
             finally
             {
-                if (Handle != startButtonHandle && Handle != taskbarHandle)
+                if (Window.Handle != startButtonHandle && Window.Handle != taskbarHandle)
                 {
                     ShowWindow(startButtonHandle, 1);
                     ShowWindow(taskbarHandle, 1);

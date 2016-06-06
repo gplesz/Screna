@@ -1,9 +1,6 @@
 ﻿using Screna.Native;
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
-//using System.Windows.Interop;
-//using SysParams = System.Windows.SystemParameters;
 
 namespace Screna
 {
@@ -13,91 +10,42 @@ namespace Screna
     /// </summary>
     public class WindowProvider : ImageProviderBase
     {
-        #region PInvoke
-        const string DllName = "user32.dll";
-
-        [DllImport(DllName)]
-        static extern IntPtr GetDesktopWindow();
-
-        [DllImport(DllName)]
-        static extern IntPtr GetForegroundWindow();
-        #endregion
-
-        /// <summary>
-        /// Height of the Desktop.
-        /// </summary>
-        public static int DesktopHeight { get; }
-
-        /// <summary>
-        /// Width of the Desktop.
-        /// </summary>
-        public static int DesktopWidth { get; }
-
         /// <summary>
         /// A <see cref="Rectangle"/> representing the entire Desktop.
         /// </summary>
         public static Rectangle DesktopRectangle { get; }
 
-        /// <summary>
-        /// Desktop Handle.
-        /// </summary>
-        public static IntPtr DesktopHandle { get; } = GetDesktopWindow();
-
-        /// <summary>
-        /// Gets the Foreground Window Handle.
-        /// </summary>
-        public static IntPtr ForegroundWindowHandle => GetForegroundWindow();
-
-        /// <summary>
-        /// Taskbar Handle: Shell_TrayWnd.
-        /// </summary>
-        public static IntPtr TaskbarHandle { get; } = User32.FindWindow("Shell_TrayWnd", null);
-
         static WindowProvider()
         {
-            //// TODO: Use some alternative which does not require STAThread
-            //using (var source = new HwndSource(new HwndSourceParameters()))
-            //{
-            //    var toDevice = source.CompositionTarget?.TransformToDevice;
-
-            //    DesktopHeight = toDevice == null ? (int)SysParams.VirtualScreenHeight : (int)Math.Round(SysParams.VirtualScreenHeight * toDevice.Value.M22);
-            //    DesktopWidth = toDevice == null ? (int)SysParams.VirtualScreenWidth : (int)Math.Round(SysParams.VirtualScreenWidth * toDevice.Value.M11);
-
-            //    DesktopRectangle = new Rectangle((int)SysParams.VirtualScreenLeft, (int)SysParams.VirtualScreenTop, DesktopWidth, DesktopHeight);
-            //}
-
             DesktopRectangle = System.Windows.Forms.SystemInformation.VirtualScreen;
-
-            DesktopHeight = DesktopRectangle.Height;
-            DesktopWidth = DesktopRectangle.Width;
         }
 
-        readonly Func<IntPtr> _hWnd;
+        readonly Func<Window> _windowFunction;
         readonly Color _backgroundColor;
 
         /// <summary>
         /// Creates a new instance of <see cref="WindowProvider"/>.
         /// </summary>
-        /// <param name="Handle">Handle of the Window to Capture.</param>
+        /// <param name="Window">The Window to Capture.</param>
         /// <param name="BackgroundColor"><see cref="Color"/> to fill blank background.</param>
         /// <param name="Overlays">Overlays to draw.</param>
-        public WindowProvider(IntPtr Handle = default(IntPtr), Color BackgroundColor = default(Color), params IOverlay[] Overlays)
-            : this(() => Handle, BackgroundColor, Overlays) { }
+        public WindowProvider(Window Window = null, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
+            : this(() => Window ?? Window.DesktopWindow, BackgroundColor, Overlays) { }
 
         /// <summary>
         /// Creates a new instance of <see cref="WindowProvider"/>.
         /// </summary>
-        /// <param name="HandleFunc">A Function returning the Handle of the Window to Capture.</param>
+        /// <param name="WindowFunction">A Function returning the Window to Capture.</param>
         /// <param name="BackgroundColor"><see cref="Color"/> to fill blank background.</param>
         /// <param name="Overlays">Overlays to draw.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="HandleFunc"/> is null.</exception>
-        public WindowProvider(Func<IntPtr> HandleFunc, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
-            : base(Overlays)
+        /// <exception cref="ArgumentNullException"><paramref name="WindowFunction"/> is null.</exception>
+        public WindowProvider(Func<Window> WindowFunction, Color BackgroundColor = default(Color), params IOverlay[] Overlays)
+            : base(Overlays, DesktopRectangle)
         {
-            if (HandleFunc == null)
-                throw new ArgumentNullException(nameof(HandleFunc));
+            if (WindowFunction == null)
+                throw new ArgumentNullException(nameof(WindowFunction));
 
-            _hWnd = HandleFunc;
+            _windowFunction = WindowFunction;
             _backgroundColor = BackgroundColor;
         }
 
@@ -106,11 +54,11 @@ namespace Screna
         /// </summary>
         protected override void OnCapture(Graphics g)
         {
-            var windowHandle = _hWnd();
+            var windowHandle = _windowFunction().Handle;
 
             var rect = DesktopRectangle;
 
-            if (windowHandle != DesktopHandle
+            if (windowHandle != Window.DesktopWindow.Handle
                 && windowHandle != IntPtr.Zero)
             {
                 RECT r;
@@ -127,15 +75,5 @@ namespace Screna
                              rect.Size,
                              CopyPixelOperation.SourceCopy);
         }
-
-        /// <summary>
-        /// Gets the Height of Captured Image = Height of Desktop.
-        /// </summary>
-        public override int Height => DesktopHeight;
-
-        /// <summary>
-        /// Gets the Width of Captured Image = Width of Desktop.
-        /// </summary>
-        public override int Width => DesktopWidth;
     }
 }

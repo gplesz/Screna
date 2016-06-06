@@ -1,5 +1,8 @@
 ![Logo](Screna.png)
 # Screna
+[![Build status](https://ci.appveyor.com/api/projects/status/nadvi6vf6kl999g5/branch/master?svg=true)](https://ci.appveyor.com/project/MathewSachin/screna/branch/master)
+![MIT License](https://img.shields.io/github/license/MathewSachin/Screna.svg)
+[![Gitter](https://badges.gitter.im/MathewSachin/Screna.svg)](https://gitter.im/MathewSachin/Screna)  
 .Net Capture Solution to Capture Screen/Audio/Video/Mouse Cursor/KeyStrokes and more...
 
 Screna provides a highly extensible API to develop Capturing Apps.

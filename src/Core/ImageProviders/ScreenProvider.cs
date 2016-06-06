@@ -18,7 +18,7 @@ namespace Screna
         /// <param name="Overlays">Items to Overlay on Captured images.</param>
         /// <exception cref="ArgumentNullException"><paramref name="Screen"/> is null.</exception>
         public ScreenProvider(Screen Screen, params IOverlay[] Overlays)
-            : base(Overlays, Screen?.Bounds.Location ?? Point.Empty)
+            : base(Overlays, Screen?.Bounds ?? Rectangle.Empty)
         {
             if (Screen == null)
                 throw new ArgumentNullException(nameof(Screen));
@@ -30,15 +30,5 @@ namespace Screna
         /// Capture Frame.
         /// </summary>
         protected override void OnCapture(Graphics g) => g.DrawImage(ScreenShot.Capture(_screen), Point.Empty);
-        
-        /// <summary>
-        /// Height of the Screen.
-        /// </summary>
-        public override int Height => _screen.Bounds.Height;
-
-        /// <summary>
-        /// Width of the Screen.
-        /// </summary>
-        public override int Width => _screen.Bounds.Height;
     }
 }

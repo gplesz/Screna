@@ -27,15 +27,19 @@ namespace Screna.NAudio
         public static IEnumerable<MMDevice> EnumerateDevices() => DeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
 
         /// <summary>
+        /// Create a new instance of <see cref="LoopbackProvider"/> using <see cref="DefaultDevice"/>.
+        /// </summary>
+        /// <param name="IncludeSilence">Whether to record silence?... default = true</param>
+        public LoopbackProvider(bool IncludeSilence = true)
+            : this(DefaultDevice, IncludeSilence) { }
+
+        /// <summary>
         /// Create a new instance of <see cref="LoopbackProvider"/>.
         /// </summary>
         /// <param name="Device"><see cref="MMDevice"/> to use.</param>
         /// <param name="IncludeSilence">Whether to record silence?... default = true</param>
-        public LoopbackProvider(MMDevice Device = null, bool IncludeSilence = true)
+        public LoopbackProvider(MMDevice Device, bool IncludeSilence = true)
         {
-            if (Device == null)
-                Device = DefaultDevice;
-
             _capture = new WasapiLoopbackCapture(Device);
 
             _capture.DataAvailable += (Sender, Args) => DataAvailable?.Invoke(this, new DataAvailableEventArgs(Args.Buffer, Args.BytesRecorded));
