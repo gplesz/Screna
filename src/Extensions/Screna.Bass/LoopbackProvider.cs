@@ -18,11 +18,11 @@ namespace Screna.Bass
         readonly WasapiProcedure _proc;
         
         /// <summary>
-        /// Create a new instance of <see cref="LoopbackProvider"/> using <see cref="WasapiLoopbackDevice.DefaultDevice"/>.
+        /// Create a new instance of <see cref="LoopbackProvider"/> using <see cref="WasapiLoopbackDevice.Default"/>.
         /// </summary>
         /// <param name="IncludeSilence">Whether to record silence?... default = true</param>
         public LoopbackProvider(bool IncludeSilence = true) 
-            : this(WasapiLoopbackDevice.DefaultDevice, IncludeSilence) { }
+            : this(WasapiLoopbackDevice.Default, IncludeSilence) { }
 
         /// <summary>
         /// Create a new instance of <see cref="LoopbackProvider"/>.
@@ -35,7 +35,7 @@ namespace Screna.Bass
             _proc = Procedure;
             
             if (IncludeSilence)
-                _silencePlayer = new Silence(PlaybackDevice.Devices.First(Dev => Dev.DeviceInfo.Driver == Device.DeviceInfo.ID));
+                _silencePlayer = new Silence(PlaybackDevice.Devices.First(Dev => Dev.Info.Driver == Device.Info.ID));
 
             BassWasapi.Init(_deviceIndex, Procedure: _proc);
             BassWasapi.CurrentDevice = Device.DeviceIndex;
@@ -94,7 +94,7 @@ namespace Screna.Bass
         /// </summary>
         public void Start()
         {
-            _silencePlayer?.Start();
+            _silencePlayer?.Play();
 
             BassWasapi.CurrentDevice = _deviceIndex;
 

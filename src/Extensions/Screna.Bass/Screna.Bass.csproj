@@ -28,8 +28,12 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ManagedBass, Version=0.22.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ManagedBass.0.22.0\lib\net45\ManagedBass.dll</HintPath>
+    <Reference Include="ManagedBass, Version=0.23.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ManagedBass.0.23.0\lib\net45\ManagedBass.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ManagedBass.PInvoke, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ManagedBass.PInvoke.0.2.1\lib\net45\ManagedBass.PInvoke.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

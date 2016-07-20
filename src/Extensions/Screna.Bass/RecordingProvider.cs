@@ -16,13 +16,13 @@ namespace Screna.Bass
         /// Creates a new instance of <see cref="RecordingProvider"/> using Default Device and <see cref="WaveFormat"/>.
         /// </summary>
         public RecordingProvider()
-            : this(RecordingDevice.DefaultDevice) { }
+            : this(RecordDevice.Default) { }
 
         /// <summary>
         /// Creates a new instance of <see cref="RecordingProvider"/> using Default <see cref="WaveFormat"/>.
         /// </summary>
         /// <param name="Device">The Recording Device.</param>
-        public RecordingProvider(RecordingDevice Device)
+        public RecordingProvider(RecordDevice Device)
             : this(Device, new WaveFormat()) { }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Screna.Bass
         /// </summary>
         /// <param name="Device">The Recording Device.</param>
         /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
-        public RecordingProvider(RecordingDevice Device, WaveFormat Wf)
+        public RecordingProvider(RecordDevice Device, WaveFormat Wf)
             : this(Device, Wf, -1) { }
 
         /// <summary>
@@ -39,13 +39,13 @@ namespace Screna.Bass
         /// <param name="Device">The Recording Device.</param>
         /// <param name="Wf"><see cref="WaveFormat"/> to use.</param>
         /// <param name="FrameRate">The <see cref="IRecorder"/>'s FrameRate.</param>
-        public RecordingProvider(RecordingDevice Device, WaveFormat Wf, int FrameRate)
+        public RecordingProvider(RecordDevice Device, WaveFormat Wf, int FrameRate)
         {
             WaveFormat = Wf;
             
-            BASS.RecordInit(Device.DeviceIndex);
+            BASS.RecordInit(Device.Index);
 
-            BASS.CurrentRecordingDevice = Device.DeviceIndex;
+            BASS.CurrentRecordingDevice = Device.Index;
 
             var flags = BassFlags.RecordPause;
             

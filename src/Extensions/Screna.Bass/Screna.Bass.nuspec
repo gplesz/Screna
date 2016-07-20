@@ -13,7 +13,7 @@ bass.dll x86/x64 needs to be downloaded from http://un4seen.com
         <summary>BASS Audio extension for Screna.</summary>
         <copyright>(c) 2016 Mathew Sachin</copyright>
         <dependencies>
-            <dependency id="ManagedBass" version="0.21.0" />
+            <dependency id="ManagedBass" version="0.23.0" />
             <dependency id="Screna" version="0.3.1" />
         </dependencies>
     </metadata>
