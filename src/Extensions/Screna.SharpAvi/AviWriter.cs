@@ -84,6 +84,8 @@ namespace Screna.Avi
                 Marshal.Copy(bits.Scan0, _videoBuffer, 0, _videoBuffer.Length);
                 Image.UnlockBits(bits);
 
+                Image.Dispose();
+
                 await _videoStream.WriteFrameAsync(true, _videoBuffer, 0, _videoBuffer.Length);
             });
         }

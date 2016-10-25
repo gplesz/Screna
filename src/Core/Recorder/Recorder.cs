@@ -180,11 +180,7 @@ namespace Screna
                             break;
 
                     // Start asynchronous (encoding and) writing of the new frame
-                    frameWriteTask = Task.Run(async () =>
-                    {
-                        await _videoEncoder.WriteFrameAsync(frame);
-                        frame.Dispose();
-                    });
+                    frameWriteTask = _videoEncoder.WriteFrameAsync(frame);
 
                     timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
                     if (timeTillNextFrame < TimeSpan.Zero)

@@ -124,11 +124,7 @@ namespace Screna
 
                     lastFrameWriteTime = DateTime.Now;
 
-                    lastFrameWriteTask = Task.Run(async () =>
-                    {
-                        await _videoEncoder.WriteFrameAsync(frame, delay);
-                        frame.Dispose();
-                    });
+                    lastFrameWriteTask = _videoEncoder.WriteFrameAsync(frame, delay);
                 }
 
                 // Wait for the last frame is written
