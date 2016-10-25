@@ -115,7 +115,7 @@ namespace Screna
         /// <param name="Image">Image frame to write.</param>
         /// <param name="Delay">Delay in milliseconds between this frame and last frame.</param>
         /// <returns>The Task Object.</returns>
-        public Task WriteFrameAsync(Bitmap Image, int Delay) => Task.Factory.StartNew(() => WriteFrame(Image, Delay));
+        public Task WriteFrameAsync(Bitmap Image, int Delay) => Task.Run(() => WriteFrame(Image, Delay));
 
         /// <summary>
         /// Initialises the <see cref="IVideoFileWriter"/>. Usually called by an <see cref="IRecorder"/>.

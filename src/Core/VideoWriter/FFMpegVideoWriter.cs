@@ -100,8 +100,7 @@ namespace Screna.FFMpeg
         /// <returns>The Task Object.</returns>
         public Task WriteFrameAsync(Bitmap Image)
         {
-            Task.Factory.StartNew(() => Image.Save(string.Format(_fileNameFormat, _fileIndex++), ImageFormat.Png));
-            return Task.FromResult(0);
+            return Task.Run(() => Image.Save(string.Format(_fileNameFormat, _fileIndex++), ImageFormat.Png));
         }
     }
 }
