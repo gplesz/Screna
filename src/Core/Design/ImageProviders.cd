@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Screna.ImageProviderBase">
+    <Position X="13.75" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIBCAAAAAAAAAAAEAAAAQAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\ImageProviderBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.ResizedImageProvider">
+    <Position X="9.5" Y="2" Width="2" />
+    <TypeIdentifier>
+      <HashCode>QAACAAAABCAAAAAAAAAAAEAAAAAIAAAAABAAAgAAAAA=</HashCode>
+      <FileName>ImageProviders\ResizedImageProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.WindowProvider">
+    <Position X="10.75" Y="5.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAIAAAAAAAAAAAAAAAAAQAgAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\WindowProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Screna.CroppedImageProvider" BaseTypeListCollapsed="true">
+    <Position X="7.25" Y="2" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABCAAAAgAAAAAAEAAAAAAAAAAABCAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\CroppedImageProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.RegionProvider">
+    <Position X="13.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\RegionProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Screna.RotatedImageProvider" BaseTypeListCollapsed="true">
+    <Position X="5" Y="2" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABCAAACAAAAAAAEAAAAAAAAAAABCAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\RotatedImageProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.ScreenProvider">
+    <Position X="16" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>ImageProviders\ScreenProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Screna.IImageProvider">
+    <Position X="15.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAEAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\IImageProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

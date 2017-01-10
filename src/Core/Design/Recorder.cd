@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Screna.Recorder">
+    <Position X="8.5" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACFAEAAAAAEAACQAAAAAAAAKAAAEAAABQABAA=</HashCode>
+      <FileName>Recorder\Recorder.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_imageProvider" />
+      <Field Name="_audioProvider" />
+      <Field Name="_videoEncoder" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Screna.RecorderBase">
+    <Position X="4.25" Y="1.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAACAAAAAAMAAACAAAgAAAAAgAIEAEBBAAAQA=</HashCode>
+      <FileName>Recorder\RecorderBase.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="State" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.UnconstrainedFrameRateGifRecorder">
+    <Position X="8.25" Y="0.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAEAAAAAEAAAQAAAAAAAACAAAEAAABQABAA=</HashCode>
+      <FileName>Recorder\UnconstrainedFrameRateGifRecorder.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_imageProvider" />
+      <Field Name="_videoEncoder" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Screna.GifWriter">
+    <Position X="16" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>gBAAACAABGQAhIAAAAAAAAAAAQQAAAAAACICAAAIAYQ=</HashCode>
+      <FileName>VideoWriter\GifWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Screna.IRecorder">
+    <Position X="1.5" Y="1.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAACAAAAAAAAAAAAAAAAAAAAAAIAAEBAAAAAA=</HashCode>
+      <FileName>Recorder\IRecorder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Screna.IImageProvider">
+    <Position X="11.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAEAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>ImageProviders\IImageProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Screna.Audio.IAudioProvider">
+    <Position X="13.75" Y="6.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAACAAAAAAAAAAABAAAAAAACAAIAAEAAAAAAA=</HashCode>
+      <FileName>Audio\IAudioProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Screna.IVideoFileWriter">
+    <Position X="5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAABAAAAAAAAAAAAQAAAAAAACACAAAAAAA=</HashCode>
+      <FileName>VideoWriter\IVideoFileWriter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Screna.RecorderState">
+    <Position X="1.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAIAAAEAAAAAAAAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Recorder\RecorderState.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

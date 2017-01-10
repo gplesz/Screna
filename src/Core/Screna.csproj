@@ -73,5 +73,11 @@
     <Compile Include="Audio\IAudioEncoder.cs" />
     <Compile Include="Native\UnsafeBitmap.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Design\AudioRecorder.cd" />
+    <None Include="Design\ImageProviders.cd" />
+    <None Include="Design\Recorder.cd" />
+    <None Include="Design\VideoWriters.cd" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

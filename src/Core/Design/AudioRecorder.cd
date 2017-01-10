@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Screna.Audio.AudioFileWriter" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAACAAAAAAAQAAAARAAAAAAAAAgAICAAFoAMA=</HashCode>
+      <FileName>Audio\AudioFileWriters\AudioFileWriter.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_format" />
+      <Field Name="_encoder" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.Audio.AudioRecorder">
+    <Position X="3.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEAACAAAAAAAAAAAAAEAAABAAAIA=</HashCode>
+      <FileName>Audio\AudioRecorder.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_writer" />
+      <Field Name="_audioProvider" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Screna.Audio.EncodedAudioProvider" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="5.25" Width="2.5" />
+    <AssociationLine Name="_audioEncoder" Type="Screna.Audio.IAudioEncoder">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.143" Y="0.245" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="WaveFormat" Type="Screna.Audio.WaveFormat">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="2.881" Y="3.237" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAgCAAAAAAAAACABAAAAAAACAAoAAEAAAQAAA=</HashCode>
+      <FileName>Audio\EncodedAudioProvider.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_audioEncoder" />
+      <Field Name="_audioProvider" />
+      <Field Name="_encodedBuffer" />
+      <Property Name="WaveFormat" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.Audio.WaveFormat">
+    <Position X="13" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAgAAEAIAAgCAAAgAAAAAAAAAAEAA=</HashCode>
+      <FileName>Audio\WaveFormat\WaveFormat.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Encoding" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Screna.Audio.WaveFormatExtra">
+    <Position X="16.25" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>Audio\WaveFormat\WaveFormatExtra.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Screna.RecorderBase">
+    <Position X="0.5" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAACAAAAAAMAAACAAAgAAAAAgAIEAEBBAAAQA=</HashCode>
+      <FileName>Recorder\RecorderBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Struct Name="System.Byte" Collapsed="true">
+    <Position X="12.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Struct>
+  <Interface Name="Screna.Audio.IAudioFileWriter">
+    <Position X="6.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIAAA=</HashCode>
+      <FileName>Audio\AudioFileWriters\IAudioFileWriter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Screna.Audio.IAudioEncoder">
+    <Position X="5.25" Y="3" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAABAAAAAgAAEAAAAAAAAAAAAAAAAAAAMAAA=</HashCode>
+      <FileName>Audio\IAudioEncoder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Screna.Audio.IAudioProvider">
+    <Position X="0.75" Y="6" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAACAAAAAAAAAAABAAAAAAACAAIAAEAAAAAAA=</HashCode>
+      <FileName>Audio\IAudioProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Screna.Audio.WaveFormatEncoding">
+    <Position X="16.25" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAgAhA=</HashCode>
+      <FileName>Audio\WaveFormat\WaveFormatEncoding.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

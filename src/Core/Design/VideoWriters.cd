@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Screna.FFMpeg.FFMpegVideoWriter" BaseTypeListCollapsed="true">
+    <Position X="7.75" Y="2" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAACACBAAAAAAFAAAAIQAABAAAACACAAAAAgA=</HashCode>
+      <FileName>VideoWriter\FFMpegVideoWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Screna.GifWriter" BaseTypeListCollapsed="true">
+    <Position X="11.5" Y="2" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>gBAAACAABGQAhIAAAAAAAAAAAQQAAAAAACICAAAIAYQ=</HashCode>
+      <FileName>VideoWriter\GifWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Screna.IVideoFileWriter">
+    <Position X="5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAABAAAAAAAAAAAAQAAAAAAACACAAAAAAA=</HashCode>
+      <FileName>VideoWriter\IVideoFileWriter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
